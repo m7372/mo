@@ -1,0 +1,3037 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <script>/* كشف قدرات الجهاز مبكراً: يضيف أصناف على <html> تُفعّل بدائل CSS للأجهزة القديمة */
+(function () {
+  var h = document.documentElement, c = [];
+  try {
+    var grid = window.CSS && CSS.supports && CSS.supports('display', 'grid');
+    if (!grid) c.push('no-grid');
+    var legacy = !window.Promise || !window.fetch;
+    if (legacy) c.push('legacy');
+    var weak = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+    if (legacy || !window.IntersectionObserver || weak) c.push('lite');
+    // هل يدعم flex gap؟
+    var d = document.createElement('div');
+    d.style.cssText = 'display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden;top:0;left:0';
+    for (var i = 0; i < 2; i++) { var k = document.createElement('div'); k.style.height = '1px'; d.appendChild(k); }
+    h.appendChild(d);
+    if (d.offsetHeight !== 3) c.push('ng');
+    h.removeChild(d);
+  } catch (e) { c.push('no-grid', 'ng', 'lite'); }
+  if (c.length) h.className += (h.className ? ' ' : '') + c.join(' ');
+})();
+</script>
+  <title>Alameeere Movies</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Alameeere">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://mo.m737217130.workers.dev" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&display=swap&text=Alameeere%20Movies" rel="stylesheet">
+  <script>
+    // hls.js فقط للمتصفحات الحديثة التي تدعم MSE؛ الأجهزة القديمة والآيفون يستعملون التشغيل الأصلي (أخف بكثير)
+    (function () {
+      var ok = window.Promise && window.fetch && (window.MediaSource || window.ManagedMediaSource) && !/\blegacy\b/.test(document.documentElement.className);
+      if (!ok) return;
+      var sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5/dist/hls.min.js'; sc.async = true;
+      document.head.appendChild(sc);
+    })();
+  </script>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; font-family:'Cairo', sans-serif; outline:none; }
+    body { background:#0f1015; color:#fff; min-height:100vh; padding-bottom:50px; overflow-x:hidden; }
+
+    /* Splash */
+    .splash-screen { position:fixed; top:0;right:0;bottom:0;left:0; background:#000; display:-webkit-flex;display:flex; -webkit-flex-direction:column;flex-direction:column; -webkit-justify-content:center;justify-content:center; -webkit-align-items:center;align-items:center; z-index:99999; cursor:pointer; transition:opacity 0.6s; }
+    .splash-title h1 { font-size:3.5rem; font-weight:900; text-shadow:0 0 25px rgba(255,255,255,0.25); }
+    .splash-title h2 { font-size:1.75rem; font-weight:400; letter-spacing:6px; color:#aaa; margin-top:-10px; }
+    .splash-hint { position:absolute; bottom:10%; font-size:1.2rem; color:#888; -webkit-animation:pulse 2s infinite;animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+@-webkit-keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+    /* Header */
+    header { background:#181920; padding:15px 25px; display:-webkit-flex;display:flex; -webkit-flex-wrap:wrap;flex-wrap:wrap; -webkit-justify-content:space-between;justify-content:space-between; -webkit-align-items:center;align-items:center; gap:15px; position:-webkit-sticky;position:sticky; top:0; z-index:100; box-shadow:0 4px 15px rgba(0,0,0,0.5); }
+    .logo h1 { font-size:24px; font-weight:900; }
+    .logo h2 { font-size:12px; color:#888; letter-spacing:3px; margin-top:2px; }
+    .search-box { display:-webkit-flex;display:flex; gap:8px; -webkit-flex:1;flex:1; max-width:400px; }
+    .search-box input { width:100%; padding:10px 14px; border-radius:6px; border:1px solid #333; background:#232530; color:#fff; }
+    .search-box button { padding:10px 18px; background:#e50914; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; }
+
+    /* Categories */
+    .categories { display:-webkit-flex;display:flex; gap:10px; overflow-x:auto; padding:15px 25px; background:#13141a; scrollbar-width:none; }
+    .categories::-webkit-scrollbar { display:none; }
+    .cat-btn { background:#232530; color:#ddd; border:1px solid #333; padding:8px 16px; border-radius:20px; cursor:pointer; white-space:nowrap; transition:0.2s; font-size:0.95rem; }
+    .cat-btn.active, .cat-btn:hover { background:#e50914; border-color:#e50914; color:#fff; }
+
+    /* Grid */
+    .container { max-width:1400px; margin:20px auto; padding:0 20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:20px; }
+    .card { background:#181920; border-radius:10px; overflow:hidden; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s; display:-webkit-flex;display:flex; -webkit-flex-direction:column;flex-direction:column; }
+    .card:hover { -webkit-transform:translateY(-6px);transform:translateY(-6px); box-shadow:0 10px 20px rgba(0,0,0,0.6); }
+    .poster-wrap { position:relative; width:100%; padding-top:145%; background:#232530; }
+    .poster-wrap img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+    .card h3 { font-size:13px; line-height:1.4; padding:12px; color:#eee; -webkit-flex:1;flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+    /* Episode count badge */
+    .ep-badge { position:absolute; bottom:8px; right:8px; background:rgba(229,9,20,0.92); color:#fff; padding:3px 10px; border-radius:6px; font-size:12px; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,0.6); z-index:2; }
+    .series-badge { display:inline-block; background:#e50914; color:#fff; padding:3px 12px; border-radius:6px; font-size:0.85rem; font-weight:700; margin-bottom:10px; }
+    .load-status { display:none; color:#aaa; font-size:0.9rem; }
+
+    /* Focus (Remote) */
+    [tabindex="0"]:focus, .card:focus, .cat-btn:focus, button:focus { outline:3px solid #e50914 !important; outline-offset:3px; -webkit-transform:scale(1.04);transform:scale(1.04); box-shadow:0 0 25px rgba(229,9,20,0.6); z-index:10; }
+
+    /* More button */
+    .more-wrap { display:none; -webkit-justify-content:center;justify-content:center; margin-top:30px; }
+    .more-btn { display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:10px; padding:12px 34px; background:#e50914; color:#fff; border:none; border-radius:30px; font-weight:700; font-size:1rem; cursor:pointer; }
+    .more-btn .ico { font-size:1.2rem; }
+    .more-btn:disabled { opacity:0.6; cursor:wait; }
+
+    /* Pagination */
+    .pagination { display:-webkit-flex;display:flex; -webkit-justify-content:center;justify-content:center; gap:15px; margin-top:35px; -webkit-align-items:center;align-items:center; }
+    .pagination button { padding:10px 20px; background:#232530; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; }
+    .pagination button:disabled { opacity:0.4; cursor:not-allowed; }
+
+    /* ===== Series Modal ===== */
+    .series-modal { display:none; position:fixed; top:0;right:0;bottom:0;left:0; background:rgba(0,0,0,0.95); z-index:998; -webkit-justify-content:center;justify-content:center; -webkit-align-items:flex-start;align-items:flex-start; padding:40px 20px; overflow-y:auto; }
+    .series-modal.show { display:-webkit-flex;display:flex; }
+    .series-content { background:#181920; border-radius:12px; width:100%; max-width:900px; overflow:hidden; position:relative; padding:25px; display:-webkit-flex;display:flex; -webkit-flex-direction:column;flex-direction:column; gap:20px; }
+    .close-btn { position:absolute; top:15px; left:15px; background:#e50914; color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10; }
+
+    .series-header-info { display:-webkit-flex;display:flex; gap:20px; -webkit-align-items:flex-start;align-items:flex-start; }
+    .series-header-info img { width:120px; border-radius:8px; }
+    .series-header-info h2 { font-size:1.5rem; margin-bottom:10px; }
+    .series-header-info p { font-size:0.9rem; color:#aaa; line-height:1.6; max-height:100px; overflow:hidden; text-overflow:ellipsis; }
+
+    .season-tabs { display:-webkit-flex;display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; border-bottom:1px solid #333; scrollbar-width:none; }
+    .season-tabs::-webkit-scrollbar { display:none; }
+    .season-tab { background:#232530; color:#ddd; border:1px solid #333; padding:8px 16px; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:0.95rem; }
+    .season-tab.active { background:#e50914; border-color:#e50914; color:#fff; }
+
+    .episodes-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px; max-height:400px; overflow-y:auto; padding:5px; }
+    .episode-btn { background:#232530; color:#fff; border:1px solid #333; padding:12px 15px; border-radius:8px; cursor:pointer; text-align:right; transition:0.2s; display:-webkit-flex;display:flex; -webkit-justify-content:space-between;justify-content:space-between; -webkit-align-items:center;align-items:center; }
+    .episode-btn:hover, .episode-btn:focus { background:#333; border-color:#e50914; }
+
+    /* ===== Player ===== */
+    .pl { display:none; position:fixed; top:0;right:0;bottom:0;left:0; background:#000; z-index:999; direction:ltr; overscroll-behavior:contain; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+    .pl.show { display:block; }
+    .pl-stage { position:absolute; top:0;right:0;bottom:0;left:0; background:#000; overflow:hidden; }
+    .pl-stage video { position:absolute; top:0;right:0;bottom:0;left:0; width:100%; height:100%; object-fit:contain; background:#000; transition:transform .25s; }
+    .pl-gesture { position:absolute; top:0;right:0;bottom:0;left:0; z-index:1; touch-action:none; -webkit-touch-callout:none; }
+    i.ic { display:-webkit-flex;display:flex; font-style:normal; }
+
+    .pl-top, .pl-bottom, .pl-mid { position:absolute; z-index:3; pointer-events:none; opacity:0; transition:opacity .25s, transform .25s; }
+    .pl.ui-on .pl-top, .pl.ui-on .pl-bottom, .pl.ui-on .pl-mid { opacity:1; -webkit-transform:none;transform:none; }
+    .pl.ui-on .pl-btn, .pl.ui-on .pl-seek { pointer-events:auto; }
+    .pl-top { top:0; left:0; right:0; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:4px; -webkit-transform:translateY(-8px);transform:translateY(-8px);
+      padding:12px 16px 30px 16px;padding:max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 30px max(16px, env(safe-area-inset-left));
+      background:linear-gradient(to bottom, rgba(0,0,0,.75), transparent); }
+    .pl-bottom { bottom:0; left:0; right:0; -webkit-transform:translateY(8px);transform:translateY(8px);
+      padding:36px 16px 10px 16px;padding:36px max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      background:linear-gradient(to top, rgba(0,0,0,.85), transparent); }
+    .pl-mid { top:50%; left:50%; -webkit-transform:translate(-50%, -50%);transform:translate(-50%, -50%); display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:7vw;gap:clamp(18px, 7vw, 48px); }
+    .pl.ui-on .pl-mid { -webkit-transform:translate(-50%, -50%);transform:translate(-50%, -50%); }
+
+    .pl-btn { width:44px; height:44px; border-radius:50%; border:none; background:transparent; color:#fff; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; -webkit-justify-content:center;justify-content:center; cursor:pointer; -webkit-flex:none;flex:none; position:relative; transition:background .15s, transform .15s; }
+    .pl-btn:hover { background:rgba(255,255,255,.14); }
+    .pl-btn:active { -webkit-transform:scale(.9);transform:scale(.9); }
+    .pl-btn svg { width:26px; height:26px; }
+    .pl-btn:focus { outline:2px solid #fff !important; outline-offset:2px; -webkit-transform:none;transform:none; box-shadow:none; background:rgba(255,255,255,.18); }
+    .pl-title { -webkit-flex:1;flex:1; min-width:0; font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 6px; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+    .pl-badge { position:absolute; bottom:2px; right:0; background:#e50914; border-radius:6px; font-size:9px; font-weight:800; padding:1px 4px; line-height:1.2; pointer-events:none; }
+
+    .pl-skip { width:54px; height:54px; }
+    .pl-skip svg { width:36px; height:36px; }
+    .pl-play, .pl-play:focus, .pl-play:hover { width:70px; height:70px; background:linear-gradient(135deg, #ff2d3a, #c4000d); box-shadow:0 6px 22px rgba(229,9,20,.5), inset 0 0 0 1px rgba(255,255,255,.25); }
+    .pl-play svg { width:32px; height:32px; }
+    .pl.loading .pl-play svg { opacity:0; }
+
+    .pl-loader { position:absolute; top:50%; left:50%; width:52px; height:52px; margin:-26px 0 0 -26px; border-radius:50%; border:4px solid rgba(255,255,255,.25); border-top-color:#fff; -webkit-animation:plspin .8s linear infinite;animation:plspin .8s linear infinite; z-index:4; display:none; pointer-events:none; }
+    .pl.loading .pl-loader { display:block; }
+    @keyframes plspin { to { -webkit-transform:rotate(360deg);transform:rotate(360deg); } }
+@-webkit-keyframes plspin { to { -webkit-transform:rotate(360deg);transform:rotate(360deg); } }
+
+    .pl-seekrow { display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:10px; color:#ddd; font-size:12px; font-variant-numeric:tabular-nums; }
+    .pl-seekrow .pl-btn { width:38px; height:38px; }
+    .pl-seekrow .pl-btn svg { width:22px; height:22px; }
+    .pl-seek { -webkit-flex:1;flex:1; height:30px; position:relative; cursor:pointer; touch-action:none; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; }
+    .pl-track { position:absolute; left:0; right:0; height:4px; border-radius:4px; background:rgba(255,255,255,.22); overflow:hidden; transition:height .15s; }
+    .pl-seek:hover .pl-track, .pl-seek.drag .pl-track { height:6px; }
+    .pl-buf, .pl-played { position:absolute; top:0;right:0;bottom:0;left:0; -webkit-transform-origin:left;transform-origin:left; -webkit-transform:scaleX(0);transform:scaleX(0); }
+    .pl-buf { background:rgba(255,255,255,.35); }
+    .pl-played { background:linear-gradient(90deg, #ff4d58, #e50914); }
+    .pl-thumb { position:absolute; top:50%; left:0; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:#fff; box-shadow:0 0 0 4px rgba(229,9,20,.35); transition:transform .15s; }
+    .pl-seek.drag .pl-thumb { -webkit-transform:scale(1.3);transform:scale(1.3); }
+
+    .pl-hud { position:absolute; top:50%; z-index:4; width:46px; padding:12px 0; margin-top:-84px; border-radius:24px; background:rgba(20,20,26,.78); display:-webkit-flex;display:flex; -webkit-flex-direction:column;flex-direction:column; -webkit-align-items:center;align-items:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .2s; }
+    .pl-hud.show { opacity:1; }
+    .pl-hud.left { left:6%;left:max(6%, env(safe-area-inset-left)); }
+    .pl-hud.right { right:6%;right:max(6%, env(safe-area-inset-right)); }
+    .pl-hud svg { width:22px; height:22px; color:#fff; }
+    .pl-hud-bar { width:6px; height:110px; border-radius:6px; background:rgba(255,255,255,.22); overflow:hidden; position:relative; }
+    .pl-hud-fill { position:absolute; top:0;right:0;bottom:0;left:0; background:#fff; -webkit-transform-origin:bottom;transform-origin:bottom; -webkit-transform:scaleY(.5);transform:scaleY(.5); }
+
+    .pl-toast { position:absolute; top:72px;top:max(72px, calc(env(safe-area-inset-top) + 60px)); left:50%; -webkit-transform:translate(-50%, -6px);transform:translate(-50%, -6px); z-index:5; background:rgba(20,20,26,.88); color:#fff; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:700; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:8px; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; white-space:nowrap; }
+    .pl-toast.show { opacity:1; -webkit-transform:translate(-50%, 0);transform:translate(-50%, 0); }
+    .pl-toast svg { width:22px; height:22px; }
+
+    .pl-panel { position:absolute; top:0; right:0; bottom:0; width:82vw;width:min(330px, 82vw); z-index:6; background:rgba(10,10,14,.97); display:-webkit-flex;display:flex; -webkit-flex-direction:column;flex-direction:column;
+      padding:12px 12px 12px 12px;padding:max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) 12px;
+      box-shadow:-10px 0 30px rgba(0,0,0,.6); -webkit-transform:translateX(100%);transform:translateX(100%); visibility:hidden; transition:transform .28s cubic-bezier(.2,.8,.2,1), visibility 0s .28s; }
+    .pl-panel.open { -webkit-transform:none;transform:none; visibility:visible; transition:transform .28s cubic-bezier(.2,.8,.2,1); }
+    .pl-ph { display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:8px; margin-bottom:12px; }
+    .pl-chips { -webkit-flex:1;flex:1; display:-webkit-flex;display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+    .pl-chip { min-width:38px; height:38px; padding:0 10px; border-radius:10px; border:1px solid #333; background:#1b1c24; color:#ddd; font-weight:700; cursor:pointer; -webkit-flex:none;flex:none; }
+    .pl-chip.on { background:#e50914; border-color:#e50914; color:#fff; }
+    .pl-eps { -webkit-flex:1;flex:1; display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; overflow-y:auto; overscroll-behavior:contain; -webkit-align-content:start;align-content:start; padding:3px; }
+    .pl-ep { height:46px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:#fff; font-weight:700; font-size:14px; cursor:pointer; }
+    .pl-ep:hover { background:rgba(255,255,255,.18); }
+    .pl-ep.cur, .pl-ep.cur:hover { background:#e50914; }
+    .pl-ep:focus, .pl-chip:focus { outline:2px solid #fff !important; outline-offset:2px; -webkit-transform:none;transform:none; box-shadow:none; }
+
+    @media (max-width: 768px) {
+      .splash-title h1 { font-size:2.5rem; }
+      .container { padding:0 8px; margin:12px auto; }
+      .grid { grid-template-columns:repeat(3, 1fr); gap:8px; }
+      .card { border-radius:8px; }
+      .card h3 { font-size:11px; padding:6px; }
+      .ep-badge { font-size:10px; padding:2px 6px; bottom:4px; right:4px; }
+      .series-header-info { -webkit-flex-direction:column;flex-direction:column; -webkit-align-items:center;align-items:center; text-align:center; }
+      .episodes-grid { grid-template-columns:1fr 1fr; }
+    }
+  
+    /* ===== Glossy black theme + brand ===== */
+    body { background:#020204; }
+    body::before { content:''; position:fixed; top:0;right:0;bottom:0;left:0; z-index:-1; pointer-events:none;
+      background:radial-gradient(110% 55% at 50% -8%, rgba(255,255,255,.075), transparent 60%),
+                  radial-gradient(55% 35% at 92% 2%, rgba(229,9,20,.12), transparent 65%),
+                  linear-gradient(180deg, #0b0c11 0%, #030305 45%, #000 100%); }
+    p.muted { color:#8b90a0; grid-column:1 / -1; text-align:center; padding:30px 0; }
+
+    header { padding:6px 12px; gap:10px; -webkit-flex-wrap:nowrap;flex-wrap:nowrap; -webkit-justify-content:flex-start;justify-content:flex-start; border-bottom:1px solid rgba(255,255,255,.06);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.75);
+      background:linear-gradient(180deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.025) 45%, rgba(0,0,0,.25) 100%), #08090d; }
+    .logo { -webkit-flex:none;flex:none; line-height:1; }
+    .logo h1.brand { font-size:21px; font-weight:900; }
+    .brand { font-family:'Cinzel Decorative', 'Cairo', serif; font-weight:900; font-size:21px; line-height:1.05; letter-spacing:1.5px; display:-webkit-flex;display:flex; direction:ltr; margin:0; text-shadow:none; font-synthesis:none; -webkit-filter:drop-shadow(0 0 7px rgba(255,214,140,.28));filter:drop-shadow(0 0 7px rgba(255,214,140,.28)); }
+    .brand span { display:inline-block; text-shadow:none; color:transparent; -webkit-text-fill-color:transparent;
+      background:linear-gradient(105deg, #7f879c 0%, #c9cfdf 28%, #fff 42%, #ffe2a1 50%, #fff 58%, #c9cfdf 72%, #7f879c 100%);
+      background-size:320% 100%; -webkit-background-clip:text; background-clip:text;
+      -webkit-animation:sheen 4.8s linear infinite;animation:sheen 4.8s linear infinite; -webkit-animation-delay:calc(var(--i) * -.28s);animation-delay:calc(var(--i) * -.28s); }
+    @keyframes sheen { from { background-position:100% 0; } to { background-position:0% 0; } }
+@-webkit-keyframes sheen { from { background-position:100% 0; } to { background-position:0% 0; } }
+    .logo h2 { font-family:'Cinzel Decorative', 'Cairo', serif; font-weight:700; font-size:8.5px; letter-spacing:7px; color:#8e95aa; margin:-1px 0 0 0; padding-left:2px; direction:ltr; text-align:left; line-height:1; }
+    .search-box { -webkit-flex:1;flex:1; min-width:0; max-width:300px; gap:6px; }
+    .search-box input { height:34px; padding:0 14px; font-size:14px; border-radius:18px; background:#0d0e14; border:1px solid rgba(255,255,255,.1); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); -webkit-appearance:none; appearance:none; }
+    .search-box input:focus { border-color:rgba(255,255,255,.28); }
+    .search-box button { height:34px; width:38px; padding:0; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; -webkit-justify-content:center;justify-content:center; border-radius:18px; -webkit-flex:none;flex:none; background:linear-gradient(180deg, #ff3a46, #c1000c); box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+
+    .splash-title { text-align:center; }
+    .splash-title .brand { font-size:12vw;font-size:clamp(40px, 12vw, 76px); -webkit-justify-content:center;justify-content:center; letter-spacing:3px; -webkit-filter:drop-shadow(0 0 16px rgba(255,214,140,.3));filter:drop-shadow(0 0 16px rgba(255,214,140,.3)); }
+    .splash-title h2 { font-family:'Cinzel Decorative', 'Cairo', serif; font-weight:700; font-size:3.4vw;font-size:clamp(12px, 3.4vw, 20px); letter-spacing:12px; color:#8e95aa; margin:-2px 0 0; padding-left:12px; }
+
+    .categories { background:transparent; padding:8px 12px; gap:8px; }
+    .cat-btn { padding:6px 14px; font-size:.9rem; color:#d9dbe4; background:linear-gradient(180deg, #22232d, #0f1016); border:1px solid rgba(255,255,255,.09); box-shadow:inset 0 1px 0 rgba(255,255,255,.1); }
+    .cat-btn.active, .cat-btn:hover { color:#fff; border-color:#ff4a55; background:linear-gradient(180deg, #ff3a46, #c1000c); box-shadow:0 0 14px rgba(229,9,20,.4), inset 0 1px 0 rgba(255,255,255,.35); }
+
+    .container { margin:12px auto; }
+    .card { background:linear-gradient(165deg, #171821, #08090d); border:1px solid rgba(255,255,255,.07); box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 4px 12px rgba(0,0,0,.55); }
+    .poster-wrap { background:#101117; }
+    .poster-wrap::after { content:''; position:absolute; top:0;right:0;bottom:0;left:0; pointer-events:none; background:linear-gradient(118deg, rgba(255,255,255,.17) 0%, rgba(255,255,255,.04) 28%, transparent 42%); }
+    .card h3 { color:#f1f2f6; }
+    @media (hover: hover) { .card:hover { -webkit-transform:translateY(-4px);transform:translateY(-4px); box-shadow:0 10px 22px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.14), inset 0 1px 0 rgba(255,255,255,.18); } }
+
+    .series-content { background:linear-gradient(180deg, #14151c, #08090d); border:1px solid rgba(255,255,255,.08); box-shadow:0 20px 60px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.1); }
+    .season-tab, .episode-btn { background:linear-gradient(180deg, #1f2029, #0f1016); border:1px solid rgba(255,255,255,.09); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
+    .season-tab.active { background:linear-gradient(180deg, #ff3a46, #c1000c); border-color:#ff4a55; }
+    .more-btn { background:linear-gradient(180deg, #ff3a46, #c1000c); box-shadow:0 6px 18px rgba(229,9,20,.4), inset 0 1px 0 rgba(255,255,255,.35); }
+
+    @media (max-width: 768px) { .logo h1.brand { font-size:19px; } header { padding:5px 8px; } .search-box { max-width:none; } }
+    @media (prefers-reduced-motion: reduce) { .brand span { -webkit-animation:none;animation:none; } }
+    /* ===== Series modal v2 + favorites + PWA ===== */
+    [hidden] { display:none !important; }
+    header { padding-top:6px;padding-top:max(6px, env(safe-area-inset-top)); }
+    .hdr-btn { height:34px; width:34px; -webkit-flex:none;flex:none; padding:0; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; -webkit-justify-content:center;justify-content:center; border-radius:50%; border:1px solid rgba(255,255,255,.12); cursor:pointer; background:linear-gradient(180deg, #22232d, #0f1016); box-shadow:inset 0 1px 0 rgba(255,255,255,.1); }
+    .fav-btn { position:absolute; top:6px; left:6px; z-index:3; width:30px; height:30px; padding:0; border-radius:50%; border:none; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; -webkit-justify-content:center;justify-content:center; color:#fff; cursor:pointer; background:rgba(0,0,0,.5); -webkit-backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px); }
+    .fav-btn svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linejoin:round; }
+    .fav-btn.on { color:#ff3a46; } .fav-btn.on svg { fill:currentColor; }
+    .fav-btn:focus { outline:none !important; -webkit-transform:none;transform:none; box-shadow:none; }
+    .pl-top .pl-btn { width:40px; height:40px; }
+    #plFav.on, #plCast.on { color:#ff3a46; } #plFav.on svg { fill:currentColor; }
+
+    .series-modal { background:rgba(0,0,0,.88); -webkit-backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px); padding:28px 14px; overscroll-behavior:contain; }
+    .series-content.sm { padding:0; gap:0; max-width:760px; border-radius:18px; }
+    .sm-hero { position:relative; isolation:isolate; padding:18px 16px 14px;padding:max(18px, env(safe-area-inset-top)) 16px 14px; }
+    .sm-bg { position:absolute; top:-30px;right:-30px;bottom:-30px;left:-30px; z-index:-2; background-size:cover; background-position:center; -webkit-filter:blur(26px) brightness(.38) saturate(1.35);filter:blur(26px) brightness(.38) saturate(1.35); -webkit-transform:scale(1.15);transform:scale(1.15); }
+    .sm-hero::after { content:''; position:absolute; top:0;right:0;bottom:0;left:0; z-index:-1; background:linear-gradient(180deg, rgba(8,9,13,.1), rgba(8,9,13,.55) 55%, #08090d); }
+    .sm .close-btn { top:10px;top:max(10px, env(safe-area-inset-top)); left:10px; width:34px; height:34px; font-size:15px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18); -webkit-backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px); }
+    .sm-head { display:-webkit-flex;display:flex; gap:14px; -webkit-align-items:flex-end;align-items:flex-end; padding-top:30px; }
+    .sm-head img { width:104px; aspect-ratio:2/3; object-fit:cover; border-radius:12px; -webkit-flex:none;flex:none; background:#101117; box-shadow:0 10px 28px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.14); }
+    .sm-info { min-width:0; -webkit-flex:1;flex:1; }
+    .sm-info h2 { font-size:1.2rem; line-height:1.35; margin:0 0 8px; font-weight:800; }
+    .sm-meta { display:-webkit-flex;display:flex; -webkit-flex-wrap:wrap;flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+    .sm .series-badge { margin:0; padding:2px 10px; font-size:.78rem; border-radius:999px; background:linear-gradient(180deg, #ff3a46, #c1000c); }
+    .sm-chip { padding:2px 10px; border-radius:999px; font-size:.78rem; font-weight:700; color:#d9dbe4; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.12); }
+    .sm-chip:empty { display:none; }
+    .sm-info p { font-size:.82rem; color:#b4b8c6; line-height:1.7; max-height:none; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
+    .sm-info p.open { display:block; -webkit-line-clamp:unset; }
+    .sm-actions { display:-webkit-flex;display:flex; gap:8px; margin-top:14px; }
+    .sm-play { -webkit-flex:1;flex:1; height:42px; border:none; border-radius:999px; color:#fff; font-weight:800; font-size:.95rem; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; -webkit-justify-content:center;justify-content:center; gap:8px; cursor:pointer; background:linear-gradient(180deg, #ff3a46, #c1000c); box-shadow:0 6px 18px rgba(229,9,20,.4), inset 0 1px 0 rgba(255,255,255,.35); }
+    .sm-play svg { width:18px; height:18px; }
+    .sm-ico { width:42px; height:42px; -webkit-flex:none;flex:none; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,.14); color:#fff; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; -webkit-justify-content:center;justify-content:center; cursor:pointer; background:linear-gradient(180deg, #242530, #101117); box-shadow:inset 0 1px 0 rgba(255,255,255,.1); }
+    .sm-ico svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .sm-ico.on { color:#ff3a46; border-color:rgba(255,58,70,.5); } .sm-ico.on svg { fill:currentColor; }
+    .sm-ico.spin svg { -webkit-animation:plspin .8s linear infinite;animation:plspin .8s linear infinite; }
+    .sm-body { padding:4px 14px 18px; background:#08090d; }
+    .sm .season-tabs { gap:6px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+    .sm .season-tab { -webkit-flex:none;flex:none; height:30px; padding:0 12px; font-size:.8rem; border-radius:999px; display:-webkit-flex;display:flex; -webkit-align-items:center;align-items:center; gap:6px; }
+    .sm .season-tab small { font-size:.68rem; opacity:.7; font-weight:700; }
+    .sm .load-status { margin:10px 0 0; font-size:.78rem; padding:6px 10px; border-radius:10px; }
+    .load-status.busy { background:rgba(255,255,255,.06); color:#b4b8c6; }
+    .load-status.warn { background:rgba(255,170,0,.1); color:#ffcf70; }
+    .sm .episodes-grid { grid-template-columns:repeat(auto-fill, minmax(52px, 1fr)); gap:8px; max-height:48vh;max-height:min(48vh, 440px); padding:12px 2px 4px; }
+    .sm .episode-btn { height:44px; padding:0; border-radius:12px; -webkit-justify-content:center;justify-content:center; font-size:.95rem; }
+    .sm .episode-btn b { font-weight:800; }
+    @media (hover: hover) { .sm .episode-btn:hover { background:linear-gradient(180deg, #ff3a46, #c1000c); border-color:#ff4a55; } }
+    .sm .episode-btn.last { border-color:#ff4a55; box-shadow:0 0 0 1px #ff4a55, 0 0 12px rgba(229,9,20,.35); }
+    .sm .episode-btn.gap { background:transparent; border:1px dashed rgba(255,255,255,.22); color:#8b90a0; box-shadow:none; }
+    .sm .episode-btn.gap.busy { opacity:.5; -webkit-animation:pulse 1s infinite;animation:pulse 1s infinite; }
+    .sm-empty { color:#8b90a0; font-size:.85rem; padding:6px 0; }
+    @media (max-width: 768px) {
+      .series-modal { padding:0; }
+      .series-content.sm { max-width:none; border-radius:0; min-height:100%; }
+      .sm-head img { width:92px; }
+      .fav-btn { width:26px; height:26px; top:4px; left:4px; } .fav-btn svg { width:14px; height:14px; }
+    }
+  
+    /* ===== دعم الأجهزة القديمة (أصناف يضيفها كشف القدرات في <head>) ===== */
+    .series-modal, .episodes-grid, .pl-eps, .pl-panel { -webkit-overflow-scrolling: touch; }
+    .sm-head img { height: 156px; }
+    @media (max-width: 768px) { .sm-head img { height: 138px; } }
+    /* بدون CSS Grid */
+    html.no-grid .grid { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 0; }
+    html.no-grid .grid > .card { -webkit-flex: none; flex: none; width: 33.333%; width: -webkit-calc(33.333% - 9px); width: calc(33.333% - 9px); margin: 0 4px 8px; }
+    html.no-grid .grid > p.muted { width: 100%; }
+    html.no-grid .episodes-grid, html.no-grid .pl-eps { gap: 0; display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; -webkit-align-content: flex-start; align-content: flex-start; }
+    html.no-grid .episode-btn { -webkit-flex: none; flex: none; width: 20%; width: -webkit-calc(20% - 10px); width: calc(20% - 10px); margin: 4px; }
+    html.no-grid .pl-ep { -webkit-flex: none; flex: none; width: 25%; width: -webkit-calc(25% - 10px); width: calc(25% - 10px); margin: 4px; }
+    @media (min-width: 769px) { html.no-grid .grid > .card { width: 16.666%; width: -webkit-calc(16.666% - 13px); width: calc(16.666% - 13px); margin: 0 6px 12px; } html.no-grid .episode-btn { width: 10%; width: -webkit-calc(10% - 10px); width: calc(10% - 10px); } }
+    /* بدون flex gap */
+    html.ng header > * { margin: 0 5px; }
+    html.ng .search-box > *, html.ng .pl-seekrow > * { margin: 0 4px; }
+    html.ng .categories > * { margin: 0 4px; }
+    html.ng .season-tabs > *, html.ng .pl-chips > *, html.ng .pl-ph > *, html.ng .pl-toast > *, html.ng .more-btn > * { margin: 0 3px; }
+    html.ng .sm-meta > * { margin: 0 3px 3px; }
+    html.ng .sm-actions > * { margin: 0 4px; }
+    html.ng .sm-head > * { margin: 0 7px; }
+    html.ng .pl-top > * { margin: 0 2px; }
+    html.ng .pl-mid > * { margin: 0 3vw; }
+    html.ng .pl-hud > * { margin: 5px 0; }
+    html.ng .sm-play > * { margin: 0 4px; }
+    /* وضع خفيف: بدون حركات/ظلال/تمويه (آيفون 4، أندرويد القديم، الأجهزة الضعيفة) */
+    html.lite * { -webkit-animation: none !important; animation: none !important; -webkit-transition: none !important; transition: none !important; text-shadow: none !important; }
+    html.lite .pl-loader, html.lite .sm-ico.spin svg { -webkit-animation: plspin .8s linear infinite !important; animation: plspin .8s linear infinite !important; }
+    html.lite .card, html.lite header, html.lite .series-content, html.lite .more-btn, html.lite .cat-btn { box-shadow: none !important; }
+    html.lite .poster-wrap::after, html.lite .sm-hero::after, html.lite .sm-bg, html.lite body::before { display: none !important; }
+    html.lite body { background: #050507; }
+    html.lite .brand { -webkit-filter: none !important; filter: none !important; }
+    html.lite .brand span { background: none !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }
+    html.lite .series-modal { background: rgba(0,0,0,.97); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    html.lite .fav-btn, html.lite .sm .close-btn { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(0,0,0,.65); }
+</style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-title">
+      <h1 class="brand">Alameeere</h1>
+      <h2>Movies</h2>
+    </div>
+    <div class="splash-hint">اضغط OK أو المس الشاشة للدخول</div>
+  </div>
+
+  <!-- Main App -->
+  <div id="main-app" style="display:none;">
+    <header>
+      <div class="logo">
+        <h1 class="brand">Alameeere</h1>
+        <h2>Movies</h2>
+      </div>
+      <form class="search-box" onsubmit="handleSearch(event)" role="search">
+        <input type="search" id="searchInput" placeholder="ابحث بالعربي أو English" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" tabindex="0" />
+        <button type="submit" tabindex="0" aria-label="بحث"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+      </form>
+      <button class="hdr-btn" id="installBtn" hidden aria-label="تثبيت التطبيق"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 19.5h14"/></svg></button>
+    </header>
+
+    <nav class="categories" id="catList">
+      <button class="cat-btn active" onclick="loadCategory('', this)">الكل</button>
+      <button class="cat-btn" onclick="showFavorites(this)">♥ المفضلة</button>
+    </nav>
+
+    <main class="container">
+      <div id="movieGrid" class="grid">جاري تحميل الأفلام...</div>
+      <div class="more-wrap" id="moreWrap">
+        <button class="more-btn" id="moreBtn" onclick="loadMore()" tabindex="0"><span class="ico">⬇️</span><span id="moreLabel">المزيد</span></button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Series Modal -->
+  <div class="series-modal" id="seriesModal">
+    <div class="series-content sm">
+      <div class="sm-hero">
+        <div class="sm-bg" id="smBg"></div>
+        <button class="close-btn" onclick="closeSeriesModal()" tabindex="0" aria-label="إغلاق">✕</button>
+        <div class="sm-head">
+          <img id="seriesPoster" src="" alt="Poster">
+          <div class="sm-info">
+            <h2 id="seriesTitle"></h2>
+            <div class="sm-meta"><span class="series-badge" id="seriesCount"></span><span class="sm-chip" id="seasonsCount"></span></div>
+            <p id="seriesStory"></p>
+          </div>
+        </div>
+        <div class="sm-actions">
+          <button class="sm-play" id="smPlay" tabindex="0"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg><span id="smPlayTxt">ابدأ المشاهدة</span></button>
+          <button class="sm-ico" id="smFav" tabindex="0" aria-label="المفضلة"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.4C1 8.3 2.7 5 6 4.6c2-.2 4 .8 6 3.1 2-2.3 4-3.3 6-3.1 3.3.4 5 3.7 3.6 7C19.5 16.4 12 21 12 21z"/></svg></button>
+          <button class="sm-ico" id="smRefresh" tabindex="0" aria-label="إعادة جلب الحلقات"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg></button>
+        </div>
+      </div>
+      <div class="sm-body">
+        <div class="season-tabs" id="seasonTabs"></div>
+        <div class="load-status" id="loadStatus"></div>
+        <div class="episodes-grid" id="episodesGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player -->
+  <div class="pl" id="playerModal">
+    <div class="pl-stage" id="plStage">
+      <video id="videoPlayer" playsinline webkit-playsinline preload="auto"></video>
+      <div class="pl-gesture" id="plGesture"></div>
+      <div class="pl-loader"></div>
+
+      <div class="pl-top">
+        <button class="pl-btn" id="plClose" tabindex="0"><i class="ic" data-icon="close"></i></button>
+        <span class="pl-title" id="plTitle" dir="auto"></span>
+        <button class="pl-btn" id="plFav" tabindex="0" aria-label="المفضلة"><i class="ic" id="plFavIc"></i></button>
+        <button class="pl-btn" id="plCast" tabindex="0" aria-label="عرض على التلفزيون"><i class="ic" data-icon="cast"></i></button>
+        <button class="pl-btn" id="plEpisodes" tabindex="0" style="display:none"><i class="ic" data-icon="list"></i></button>
+        <button class="pl-btn" id="plQuality" tabindex="0" style="display:none"><i class="ic" data-icon="hd"></i><span class="pl-badge" id="plQBadge"></span></button>
+        <button class="pl-btn" id="plAspect" tabindex="0"><i class="ic" id="plAspectIc"></i></button>
+      </div>
+
+      <div class="pl-mid">
+        <button class="pl-btn pl-skip" id="plBack" tabindex="0"><i class="ic" data-icon="back10"></i></button>
+        <button class="pl-btn pl-play" id="plPlay" tabindex="0"><i class="ic" id="plPlayIc" data-icon="play"></i></button>
+        <button class="pl-btn pl-skip" id="plFwd" tabindex="0"><i class="ic" data-icon="fwd10"></i></button>
+      </div>
+
+      <div class="pl-bottom">
+        <div class="pl-seekrow">
+          <span id="plCur">0:00</span>
+          <div class="pl-seek" id="plSeek">
+            <div class="pl-track"><div class="pl-buf" id="plBuf"></div><div class="pl-played" id="plPlayed"></div></div>
+            <div class="pl-thumb" id="plThumb"></div>
+          </div>
+          <span id="plDur">0:00</span>
+          <button class="pl-btn" id="plMute" tabindex="0"><i class="ic" id="plMuteIc" data-icon="vol"></i></button>
+          <button class="pl-btn" id="plFs" tabindex="0"><i class="ic" id="plFsIc" data-icon="fs"></i></button>
+        </div>
+      </div>
+
+      <div class="pl-hud left" id="plHud"><i class="ic" id="plHudIcon"></i><div class="pl-hud-bar"><div class="pl-hud-fill" id="plHudFill"></div></div></div>
+      <div class="pl-toast" id="plToast"></div>
+
+      <div class="pl-panel" id="plPanel">
+        <div class="pl-ph">
+          <div class="pl-chips" id="plChips"></div>
+          <button class="pl-btn" id="plPanelClose" tabindex="0"><i class="ic" data-icon="close"></i></button>
+        </div>
+        <div class="pl-eps" id="plEps"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>/* Polyfills صغيرة للأجهزة القديمة (أندرويد 4.4+ / iOS 7+) — لا تفعل شيئاً في المتصفحات الحديثة */
+(function (g) {
+  'use strict';
+  var AP = Array.prototype, SP = String.prototype;
+
+  // ---- Promise ----
+  function addFinally(P) {
+    if (!P.prototype['finally']) P.prototype['finally'] = function (f) {
+      var C = this.constructor || P;
+      return this.then(function (v) { return C.resolve(f()).then(function () { return v; }); },
+                       function (e) { return C.resolve(f()).then(function () { throw e; }); });
+    };
+  }
+  if (g.Promise && g.Promise.all && g.Promise.race && g.Promise.resolve) addFinally(g.Promise);
+  else {
+    var later = function (f) { setTimeout(f, 0); };
+    var settle = function (p, s, v) { if (p._s) return; p._s = s; p._v = v; var q = p._q; p._q = null; for (var i = 0; i < q.length; i++) sched(p, q[i]); };
+    var doResolve = function (fn, p) {
+      var done = false;
+      try { fn(function (v) { if (!done) { done = true; resolve(p, v); } }, function (e) { if (!done) { done = true; settle(p, 2, e); } }); }
+      catch (e) { if (!done) { done = true; settle(p, 2, e); } }
+    };
+    var resolve = function (p, v) {
+      try {
+        if (v === p) throw new TypeError('Promise cycle');
+        if (v && (typeof v === 'object' || typeof v === 'function')) {
+          var t = v.then;
+          if (typeof t === 'function') { doResolve(function (a, b) { t.call(v, a, b); }, p); return; }
+        }
+        settle(p, 1, v);
+      } catch (e) { settle(p, 2, e); }
+    };
+    var run = function (p, h) {
+      var cb = p._s === 1 ? h.f : h.r;
+      if (typeof cb !== 'function') { if (p._s === 1) resolve(h.p, p._v); else settle(h.p, 2, p._v); return; }
+      var out;
+      try { out = cb(p._v); } catch (e) { settle(h.p, 2, e); return; }
+      resolve(h.p, out);
+    };
+    var sched = function (p, h) { later(function () { run(p, h); }); };
+    var P = function (fn) {
+      if (typeof fn !== 'function') throw new TypeError('not a function');
+      this._s = 0; this._v = void 0; this._q = [];
+      doResolve(fn, this);
+    };
+    P.prototype.then = function (f, r) {
+      var np = new P(function () {}), h = { f: f, r: r, p: np };
+      if (this._s === 0) this._q.push(h); else sched(this, h);
+      return np;
+    };
+    P.prototype['catch'] = function (r) { return this.then(null, r); };
+    addFinally(P);
+    P.resolve = function (v) { return v instanceof P ? v : new P(function (res) { res(v); }); };
+    P.reject = function (e) { return new P(function (_, rej) { rej(e); }); };
+    P.all = function (arr) {
+      return new P(function (res, rej) {
+        var n = arr.length, out = new Array(n), left = n;
+        if (!n) { res(out); return; }
+        for (var i = 0; i < n; i++) (function (i) {
+          P.resolve(arr[i]).then(function (v) { out[i] = v; if (--left === 0) res(out); }, rej);
+        })(i);
+      });
+    };
+    P.race = function (arr) { return new P(function (res, rej) { for (var i = 0; i < arr.length; i++) P.resolve(arr[i]).then(res, rej); }); };
+    g.Promise = P;
+  }
+
+  // ---- AbortController + fetch (عبر XHR، يدعم الإلغاء) ----
+  function abortErr() { var e = new Error('Aborted'); e.name = 'AbortError'; return e; }
+  if (!g.AbortController) {
+    g.AbortController = function () {
+      this.signal = { aborted: false, _l: [], addEventListener: function (t, f) { this._l.push(f); }, removeEventListener: function () {} };
+    };
+    g.AbortController.prototype.abort = function () {
+      var s = this.signal; if (s.aborted) return; s.aborted = true;
+      for (var i = 0; i < s._l.length; i++) { try { s._l[i].call(s, { type: 'abort' }); } catch (e) {} }
+    };
+  }
+  // fetch الأصلي بدون AbortController لا يمكن إلغاؤه → نستبدله بنسخة XHR
+  var needXhr = !g.fetch || !(typeof g.AbortController === 'function' && g.AbortController.toString().indexOf('native code') > -1);
+  if (needXhr) {
+    g.fetch = function (url, opt) {
+      opt = opt || {};
+      return new g.Promise(function (resolve, reject) {
+        var x = new XMLHttpRequest(), sig = opt.signal;
+        if (sig && sig.aborted) { reject(abortErr()); return; }
+        x.open(opt.method || 'GET', url, true);
+        var hd = opt.headers || {};
+        for (var k in hd) if (Object.prototype.hasOwnProperty.call(hd, k)) x.setRequestHeader(k, hd[k]);
+        x.onload = function () {
+          var t = x.responseText;
+          resolve({
+            ok: x.status >= 200 && x.status < 300, status: x.status, statusText: x.statusText, url: url,
+            text: function () { return g.Promise.resolve(t); },
+            json: function () { return new g.Promise(function (a, b) { try { a(JSON.parse(t)); } catch (e) { b(e); } }); }
+          });
+        };
+        x.onerror = function () { reject(new TypeError('Network request failed')); };
+        x.ontimeout = x.onerror;
+        if (sig && sig.addEventListener) sig.addEventListener('abort', function () { try { x.abort(); } catch (e) {} reject(abortErr()); });
+        x.send(opt.body || null);
+      });
+    };
+  }
+
+  // ---- Map / Set (ترتيب الإدخال، بدون Symbol) ----
+  function it(a) { var i = 0; a.next = function () { return i < a.length ? { value: a[i++], done: false } : { value: void 0, done: true }; }; return a; }
+  function hk(k) { var t = typeof k; return t === 'string' ? 's' + k : t === 'number' ? 'n' + k : t === 'boolean' ? 'b' + k : k == null ? 'x' + k : null; }
+  function Coll(isMap, init) {
+    this._m = isMap; this._k = []; this._v = []; this._h = {}; this._d = false; this.size = 0;
+    if (init) { var i, a = init; if (a._vals) a = isMap ? a.entries() : a._vals(); for (i = 0; i < a.length; i++) { if (isMap) this.set(a[i][0], a[i][1]); else this.add(a[i]); } }
+  }
+  var CP = Coll.prototype;
+  CP._ix = function (k) {
+    var h = hk(k);
+    if (this._d) { this._h = {}; for (var i = 0; i < this._k.length; i++) { var q = hk(this._k[i]); if (q !== null) this._h[q] = i; } this._d = false; }
+    if (h !== null) { var v = this._h[h]; return v === void 0 ? -1 : v; }
+    for (var j = 0; j < this._k.length; j++) if (this._k[j] === k) return j;
+    return -1;
+  };
+  CP.has = function (k) { return this._ix(k) > -1; };
+  CP.get = function (k) { var i = this._ix(k); return i > -1 ? this._v[i] : void 0; };
+  CP.set = function (k, v) {
+    var i = this._ix(k);
+    if (i > -1) { this._v[i] = v; return this; }
+    this._k.push(k); this._v.push(v); this.size = this._k.length;
+    var h = hk(k); if (h !== null) this._h[h] = this._k.length - 1;
+    return this;
+  };
+  CP.add = function (k) { return this.set(k, k); };
+  CP['delete'] = function (k) {
+    var i = this._ix(k); if (i < 0) return false;
+    this._k.splice(i, 1); this._v.splice(i, 1); this.size = this._k.length; this._d = true; return true;
+  };
+  CP.clear = function () { this._k = []; this._v = []; this._h = {}; this._d = false; this.size = 0; };
+  CP.forEach = function (f, t) { var k = this._k.slice(), v = this._v.slice(); for (var i = 0; i < k.length; i++) f.call(t, v[i], k[i], this); };
+  CP.keys = function () { return it(this._k.slice()); };
+  CP.values = function () { return it(this._v.slice()); };
+  CP.entries = function () { var o = []; for (var i = 0; i < this._k.length; i++) o.push([this._k[i], this._v[i]]); return it(o); };
+  CP._vals = function () { return this._m ? this.entries() : this._v.slice(); };
+  var okColl = typeof g.Map === 'function' && typeof g.Set === 'function' && g.Map.prototype.forEach && g.Set.prototype.forEach && g.Map.prototype.entries &&
+    (function () { try { return new g.Set([1, 2]).size === 2 && typeof Symbol === 'function' && !!Symbol.iterator; } catch (e) { return false; } })();
+  if (!okColl) {
+    g.Map = function (init) { return new Coll(true, init); };
+    g.Set = function (init) { return new Coll(false, init); };
+    g.Map.prototype = g.Set.prototype = CP;
+  }
+
+  // ---- Array / String / Object / Number / Math ----
+  if (!Array.isArray) Array.isArray = function (a) { return Object.prototype.toString.call(a) === '[object Array]'; };
+  if (!Array.from) Array.from = function (x, f, t) {
+    var out = [], i; if (x == null) return out;
+    if (x._vals) x = x._vals(); else if (typeof x === 'string') x = x.split('');
+    else if (typeof Symbol === 'function' && Symbol.iterator && x[Symbol.iterator] && typeof x.length !== 'number') {
+      var itr = x[Symbol.iterator](), r, k = 0;
+      while (!(r = itr.next()).done) out.push(f ? f.call(t, r.value, k++) : r.value);
+      return out;
+    }
+    var n = x.length >>> 0; for (i = 0; i < n; i++) out.push(f ? f.call(t, x[i], i) : x[i]); return out;
+  };
+  if (!AP.find) AP.find = function (f, t) { for (var i = 0; i < this.length; i++) if (f.call(t, this[i], i, this)) return this[i]; };
+  if (!AP.findIndex) AP.findIndex = function (f, t) { for (var i = 0; i < this.length; i++) if (f.call(t, this[i], i, this)) return i; return -1; };
+  if (!AP.includes) AP.includes = function (v, from) { for (var i = from || 0; i < this.length; i++) if (this[i] === v || (v !== v && this[i] !== this[i])) return true; return false; };
+  if (!SP.includes) SP.includes = function (s, p) { return this.indexOf(s, p || 0) > -1; };
+  if (!SP.startsWith) SP.startsWith = function (s, p) { p = p || 0; return this.substr(p, s.length) === s; };
+  if (!SP.endsWith) SP.endsWith = function (s, l) { var t = l === void 0 || l > this.length ? this.length : l; return this.substring(t - s.length, t) === s; };
+  if (!SP.repeat) SP.repeat = function (n) { var o = '', i; for (i = 0; i < n; i++) o += this; return o; };
+  if (!SP.padStart) SP.padStart = function (n, f) { var s = String(this), pad = ''; f = f === void 0 ? ' ' : String(f); while (pad.length + s.length < n) pad += f; return pad.slice(0, Math.max(0, n - s.length)) + s; };
+  if (!Object.assign) Object.assign = function (t) {
+    for (var i = 1; i < arguments.length; i++) { var s = arguments[i]; if (s) for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k]; }
+    return t;
+  };
+  if (!Number.isFinite) Number.isFinite = function (v) { return typeof v === 'number' && isFinite(v); };
+  if (!Math.hypot) Math.hypot = function () { var s = 0; for (var i = 0; i < arguments.length; i++) s += arguments[i] * arguments[i]; return Math.sqrt(s); };
+  if (!Math.sign) Math.sign = function (v) { v = +v; return v > 0 ? 1 : v < 0 ? -1 : v; };
+  if (!Math.trunc) Math.trunc = function (v) { return v < 0 ? Math.ceil(v) : Math.floor(v); };
+  if (!g.performance) g.performance = {};
+  if (!g.performance.now) { var t0 = Date.now(); g.performance.now = function () { return Date.now() - t0; }; }
+  g.requestAnimationFrame = g.requestAnimationFrame || g.webkitRequestAnimationFrame || function (f) { return setTimeout(function () { f(Date.now()); }, 16); };
+  g.cancelAnimationFrame = g.cancelAnimationFrame || g.webkitCancelAnimationFrame || clearTimeout;
+  if (g.NodeList && !NodeList.prototype.forEach) NodeList.prototype.forEach = AP.forEach;
+  if (g.HTMLCollection && !HTMLCollection.prototype.forEach) HTMLCollection.prototype.forEach = AP.forEach;
+  if (g.Element && !Element.prototype.matches) Element.prototype.matches = Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector;
+  // classList.toggle(name, force)
+  try {
+    var tt = document.createElement('div'); tt.classList.toggle('a', false);
+    if (tt.classList.contains('a')) throw 0;
+  } catch (e) {
+    if (g.DOMTokenList) { var ot = DOMTokenList.prototype.toggle; DOMTokenList.prototype.toggle = function (n, f) { if (f === void 0) return ot.call(this, n); if (f) this.add(n); else this.remove(n); return !!f; }; }
+  }
+
+  // ---- مساعدات يستعملها الكود ----
+  g.A = function (x) {              // أي مجموعة → مصفوفة حقيقية
+    if (Array.isArray(x)) return x;
+    if (x == null) return [];
+    if (x._vals) return x._vals();
+    return Array.from(x);
+  };
+  g.safePlay = function (v) { try { var p = v.play(); if (p && p['catch']) p['catch'](function () {}); } catch (e) {} };
+
+  // ---- Pointer Events فوق Touch/Mouse (للأجهزة التي لا تدعمها) ----
+  if (!g.PointerEvent) {
+    var pe = function (type, src, t, ptype, id) {
+      var ev = document.createEvent('Event');
+      ev.initEvent(type, true, true);
+      ev.pointerId = id; ev.pointerType = ptype; ev.isPrimary = true; ev.button = 0;
+      ev.clientX = t.clientX; ev.clientY = t.clientY; ev.pageX = t.pageX; ev.pageY = t.pageY;
+      src.dispatchEvent(ev);
+    };
+    var El = g.Element && Element.prototype;
+    if (El) {
+      El.setPointerCapture = El.setPointerCapture || function () {};
+      El.releasePointerCapture = El.releasePointerCapture || function () {};
+      El.hasPointerCapture = El.hasPointerCapture || function () { return false; };
+    }
+    var lastTouch = 0, md = false, passive = false;
+    try { var o = Object.defineProperty({}, 'passive', { get: function () { passive = true; } }); g.addEventListener('t', null, o); } catch (e) {}
+    var inPlayer = function (n) { while (n && n !== document) { if (n.id === 'playerModal') return true; n = n.parentNode; } return false; };
+    document.addEventListener('touchstart', function (e) { lastTouch = Date.now(); var t = e.changedTouches[0]; pe('pointerdown', e.target, t, 'touch', t.identifier + 1); }, true);
+    document.addEventListener('touchmove', function (e) {
+      lastTouch = Date.now(); var t = e.changedTouches[0];
+      if (inPlayer(e.target) && e.cancelable) e.preventDefault();   // يمنع تمرير الصفحة أثناء السحب في المشغل
+      pe('pointermove', e.target, t, 'touch', t.identifier + 1);
+    }, passive ? { passive: false, capture: true } : true);
+    document.addEventListener('touchend', function (e) { lastTouch = Date.now(); var t = e.changedTouches[0]; pe('pointerup', e.target, t, 'touch', t.identifier + 1); }, true);
+    document.addEventListener('touchcancel', function (e) { lastTouch = Date.now(); var t = e.changedTouches[0]; pe('pointercancel', e.target, t, 'touch', t.identifier + 1); }, true);
+    document.addEventListener('mousedown', function (e) { if (Date.now() - lastTouch < 800) return; md = true; pe('pointerdown', e.target, e, 'mouse', 1); }, true);
+    document.addEventListener('mousemove', function (e) { if (Date.now() - lastTouch < 800) return; pe('pointermove', e.target, e, 'mouse', 1); }, true);
+    document.addEventListener('mouseup', function (e) { if (!md) return; md = false; pe('pointerup', e.target, e, 'mouse', 1); }, true);
+  }
+})(window);
+</script>
+  <script>
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var API = 'https://mo.m737217130.workers.dev/';
+var currentPage = 1;
+var currentCategory = '';
+var currentSearch = '';
+var hls = null;
+var hideControlsTimer;
+var shownKeys = new Set();
+var seenPostIds = new Set();
+var seriesMap = new Map();
+var hasMore = true;
+var loadingMore = false;
+var listToken = 0;
+var activeSeries = null;
+var activeSeasonName = null;
+var pending = [];
+var workers = 0;
+var MAX_WORKERS = 2;
+var isMobile = function () { return window.matchMedia('(max-width: 768px)').matches; };
+var splash = document.getElementById('splash-screen');
+var mainApp = document.getElementById('main-app');
+function enterSite() {
+    splash.style.opacity = '0';
+    setTimeout(function () {
+        splash.style.display = 'none';
+        mainApp.style.display = 'block';
+        fetchCategories();
+        loadMore(true);
+        setTimeout(function () { var first = document.querySelector('.cat-btn'); if (first)
+            first.focus(); }, 100);
+    }, 600);
+}
+splash.addEventListener('click', enterSite);
+document.addEventListener('keydown', function (e) {
+    if (splash.style.display !== 'none' && (e.key === 'Enter' || e.key === ' '))
+        enterSite();
+});
+function normAr(s) {
+    return String(s || '')
+        .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
+        .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+}
+function seasonOrder(name) {
+    var n = normAr(name);
+    var m = n.match(/\d+/);
+    if (m)
+        return parseInt(m[0], 10);
+    var words = ['اول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس', 'سابع', 'ثامن', 'تاسع', 'عاشر'];
+    for (var i = 0; i < words.length; i++)
+        if (n.includes(words[i]))
+            return i + 1;
+    return 999;
+}
+function episodeNumber(ep) {
+    var _a;
+    var m = normAr((_a = ep.meta) === null || _a === void 0 ? void 0 : _a.number).match(/\d+/);
+    if (!m)
+        m = normAr(ep.title).match(/الحلقه\s*(\d+)/);
+    return m ? parseInt(m[1] || m[0], 10) : 9999;
+}
+function seasonNameOf(ep) {
+    var _a;
+    return ((_a = ep.season_info) === null || _a === void 0 ? void 0 : _a.name) || ep.movie_season || 'الموسم الأول';
+}
+function addEpisodes(series, eps) {
+    eps.forEach(function (ep) {
+        if (!series.episodes.some(function (e) { return e.realid === ep.realid; }))
+            series.episodes.push(ep);
+    });
+}
+function fetchJSON(url_1) {
+    return __awaiter(this, arguments, void 0, function (url, tries, ms) {
+        var err, _loop_1, i, state_1;
+        if (tries === void 0) { tries = 3; }
+        if (ms === void 0) { ms = 9000; }
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _loop_1 = function (i) {
+                        var ctrl, t, res, _b, e_1;
+                        return __generator(this, function (_c) {
+                            switch (_c.label) {
+                                case 0:
+                                    ctrl = new AbortController();
+                                    t = setTimeout(function () { return ctrl.abort(); }, ms);
+                                    _c.label = 1;
+                                case 1:
+                                    _c.trys.push([1, 4, 7, 8]);
+                                    return [4, fetch(url, { signal: ctrl.signal })];
+                                case 2:
+                                    res = _c.sent();
+                                    if (res.status >= 500)
+                                        throw new Error('HTTP ' + res.status);
+                                    _b = {};
+                                    return [4, res.json()];
+                                case 3: return [2, (_b.value = _c.sent(), _b)];
+                                case 4:
+                                    e_1 = _c.sent();
+                                    err = e_1;
+                                    if (!(i < tries - 1)) return [3, 6];
+                                    return [4, new Promise(function (r) { return setTimeout(r, 350 * (i + 1)); })];
+                                case 5:
+                                    _c.sent();
+                                    _c.label = 6;
+                                case 6: return [3, 8];
+                                case 7:
+                                    clearTimeout(t);
+                                    return [7];
+                                case 8: return [2];
+                            }
+                        });
+                    };
+                    i = 0;
+                    _a.label = 1;
+                case 1:
+                    if (!(i < tries)) return [3, 4];
+                    return [5, _loop_1(i)];
+                case 2:
+                    state_1 = _a.sent();
+                    if (typeof state_1 === "object")
+                        return [2, state_1.value];
+                    _a.label = 3;
+                case 3:
+                    i++;
+                    return [3, 1];
+                case 4: throw err;
+            }
+        });
+    });
+}
+function cleanQuery(s) {
+    return String(s || '')
+        .replace(/الحلقة\s*[\d٠-٩]*/g, ' ')
+        .replace(/(الموسم|موسم)\s*\S*/g, ' ')
+        .replace(/season\s*\d*/gi, ' ')
+        .replace(/episode\s*\d*/gi, ' ')
+        .replace(/مترجم[ةه]?|مدبلج[ةه]?/g, ' ')
+        .replace(/\s+/g, ' ').trim();
+}
+function buildQueries(series) {
+    var _a;
+    var raw = [
+        series.title.replace('الحلقة', '').trim(),
+        cleanQuery(series.title),
+        series.infoName,
+        cleanQuery((_a = series.episodes[0]) === null || _a === void 0 ? void 0 : _a.title)
+    ];
+    return A(new Set(raw.map(function (q) { return (q || '').trim(); }).filter(function (q) { return q.length > 1; }))).slice(0, 3);
+}
+function badgeText(series) {
+    if (series.countReady)
+        return "".concat(series.episodes.length, " \u062D\u0644\u0642\u0629");
+    return series.cached ? "".concat(series.cached, " \u062D\u0644\u0642\u0629") : '…';
+}
+function updateBadge(series) {
+    if (series.badgeEl)
+        series.badgeEl.textContent = badgeText(series);
+    if (series === activeSeries) {
+        var n = series.episodes.length;
+        document.getElementById('seriesCount').textContent = series.countReady ? "".concat(n, " \u062D\u0644\u0642\u0629") : "".concat(n, " \u062D\u0644\u0642\u0629\u2026");
+    }
+}
+function updateLoadStatus() {
+    var st = document.getElementById('loadStatus');
+    var rf = document.getElementById('smRefresh');
+    if (!activeSeries) {
+        st.style.display = 'none';
+        return;
+    }
+    var s = activeSeries;
+    if (rf)
+        rf.classList.toggle('spin', !!s.loading);
+    if (s.loading) {
+        st.className = 'load-status busy';
+        st.textContent = "\u062C\u0627\u0631\u064A \u062A\u062D\u0645\u064A\u0644 \u0628\u0627\u0642\u064A \u0627\u0644\u062D\u0644\u0642\u0627\u062A\u2026 (".concat(s.episodes.length, ")");
+        st.style.display = 'block';
+    }
+    else {
+        var gaps = s.countReady ? missingMap(s).length : 0;
+        if (gaps) {
+            st.className = 'load-status warn';
+            st.textContent = "\u0646\u0627\u0642\u0635 ".concat(gaps, " \u062D\u0644\u0642\u0629 (\u0627\u0644\u0645\u0631\u0628\u0639\u0627\u062A \u0627\u0644\u0645\u0646\u0642\u0637\u0629) \u2014 \u0627\u0636\u063A\u0637 \u0639\u0644\u064A\u0647\u0627 \u0623\u0648 \u0639\u0644\u0649 \u21BB \u0644\u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u062C\u0644\u0628");
+            st.style.display = 'block';
+        }
+        else
+            st.style.display = 'none';
+    }
+}
+var progT = 0;
+function progress(series) {
+    updateBadge(series);
+    if (series === activeSeries || (series === playerSeries && panelOpen)) {
+        if (progT)
+            return;
+        progT = setTimeout(function () {
+            progT = 0;
+            if (activeSeries) {
+                renderSeries();
+                updateLoadStatus();
+            }
+            if (playerSeries && panelOpen)
+                renderEpPanel();
+        }, 120);
+    }
+}
+var ORD_AR = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر'];
+var wanted = function (s) { return s === activeSeries || s === playerSeries; };
+var baseName = function (s) { return cleanQuery(s.title) || s.title; };
+function absorb(series, posts) {
+    var mine = posts.filter(function (p) { return p.series_slug === series.series_slug; });
+    var before = series.episodes.length;
+    if (mine.length)
+        addEpisodes(series, mine);
+    return series.episodes.length - before;
+}
+function hasEp(series, season, n) {
+    return series.episodes.some(function (e) { return seasonNameOf(e) === season && episodeNumber(e) === n; });
+}
+function missingMap(series) {
+    var seasons = groupSeasons(series), out = [];
+    Object.keys(seasons).forEach(function (name) {
+        var have = new Set(seasons[name].map(episodeNumber).filter(function (n) { return n < 9999; }));
+        if (!have.size)
+            return;
+        var max = Math.max.apply(null, A(have));
+        if (max > 500)
+            return;
+        for (var n = 1; n <= max; n++)
+            if (!have.has(n))
+                out.push({ season: name, n: n });
+    });
+    return out;
+}
+function sweep(series, q, seen, maxPages) {
+    return __awaiter(this, void 0, void 0, function () {
+        var stalls, noMatch, page, data, e_2, posts, fresh;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    stalls = 0, noMatch = 0;
+                    page = 1;
+                    _a.label = 1;
+                case 1:
+                    if (!(page <= maxPages)) return [3, 7];
+                    data = void 0;
+                    _a.label = 2;
+                case 2:
+                    _a.trys.push([2, 4, , 5]);
+                    return [4, fetchJSON("".concat(API, "?action=search&search=").concat(encodeURIComponent(q), "&page=").concat(page))];
+                case 3:
+                    data = _a.sent();
+                    return [3, 5];
+                case 4:
+                    e_2 = _a.sent();
+                    return [3, 7];
+                case 5:
+                    posts = (data === null || data === void 0 ? void 0 : data.posts) || [];
+                    if (!posts.length)
+                        return [3, 7];
+                    fresh = posts.filter(function (p) { return !seen.has(p.realid); });
+                    if (!fresh.length) {
+                        if (++stalls >= 3)
+                            return [3, 7];
+                        return [3, 6];
+                    }
+                    stalls = 0;
+                    fresh.forEach(function (p) { return seen.add(p.realid); });
+                    if (absorb(series, fresh)) {
+                        noMatch = 0;
+                        progress(series);
+                    }
+                    else if (++noMatch >= 5)
+                        return [3, 7];
+                    _a.label = 6;
+                case 6:
+                    page++;
+                    return [3, 1];
+                case 7: return [2];
+            }
+        });
+    });
+}
+function probeEp(series, season, n) {
+    return __awaiter(this, void 0, void 0, function () {
+        var base, multi, qs, _i, qs_1, q, d, e_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (hasEp(series, season, n))
+                        return [2, true];
+                    base = baseName(series);
+                    multi = new Set(series.episodes.map(seasonNameOf)).size > 1;
+                    qs = multi ? ["".concat(base, " \u0627\u0644\u062D\u0644\u0642\u0629 ").concat(n), "".concat(base, " ").concat(season, " \u0627\u0644\u062D\u0644\u0642\u0629 ").concat(n)] : ["".concat(base, " \u0627\u0644\u062D\u0644\u0642\u0629 ").concat(n), "".concat(base, " ").concat(n)];
+                    _i = 0, qs_1 = qs;
+                    _a.label = 1;
+                case 1:
+                    if (!(_i < qs_1.length)) return [3, 7];
+                    q = qs_1[_i];
+                    d = void 0;
+                    _a.label = 2;
+                case 2:
+                    _a.trys.push([2, 4, , 5]);
+                    return [4, fetchJSON("".concat(API, "?action=search&search=").concat(encodeURIComponent(q), "&page=1"), 2)];
+                case 3:
+                    d = _a.sent();
+                    return [3, 5];
+                case 4:
+                    e_3 = _a.sent();
+                    return [3, 6];
+                case 5:
+                    if (absorb(series, (d === null || d === void 0 ? void 0 : d.posts) || [])) {
+                        progress(series);
+                        if (hasEp(series, season, n))
+                            return [2, true];
+                    }
+                    _a.label = 6;
+                case 6:
+                    _i++;
+                    return [3, 1];
+                case 7: return [2, false];
+            }
+        });
+    });
+}
+function probeSeasons(series, deep) {
+    return __awaiter(this, void 0, void 0, function () {
+        var orders, top, want, k, base, _i, want_1, k, _a, _b, q, before;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    orders = new Set(Object.keys(groupSeasons(series)).map(seasonOrder));
+                    top = Math.max.apply(null, [0].concat(A(orders).filter(function (o) { return o < 999; })));
+                    want = [];
+                    for (k = 1; k <= top && k <= 30; k++)
+                        if (!orders.has(k))
+                            want.push(k);
+                    if (deep)
+                        want.push(top + 1, top + 2);
+                    base = baseName(series);
+                    _i = 0, want_1 = want;
+                    _c.label = 1;
+                case 1:
+                    if (!(_i < want_1.length)) return [3, 6];
+                    k = want_1[_i];
+                    if (!wanted(series)) {
+                        series.aborted = true;
+                        return [2];
+                    }
+                    _a = 0, _b = ["".concat(base, " \u0627\u0644\u0645\u0648\u0633\u0645 ").concat(ORD_AR[k - 1] || k), "".concat(base, " \u0627\u0644\u0645\u0648\u0633\u0645 ").concat(k)];
+                    _c.label = 2;
+                case 2:
+                    if (!(_a < _b.length)) return [3, 5];
+                    q = _b[_a];
+                    before = series.episodes.length;
+                    return [4, sweep(series, q, new Set(), 4)];
+                case 3:
+                    _c.sent();
+                    if (series.episodes.length > before)
+                        return [3, 5];
+                    _c.label = 4;
+                case 4:
+                    _a++;
+                    return [3, 2];
+                case 5:
+                    _i++;
+                    return [3, 1];
+                case 6: return [2];
+            }
+        });
+    });
+}
+function fillGaps(series, deep) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tried, jobs, k, seasons, _i, _a, name, nums, n, miss, left;
+        var _this = this;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    tried = series.tried || (series.tried = new Set());
+                    jobs = missingMap(series).filter(function (g) { return deep || !tried.has(g.season + '|' + g.n); }).slice(0, deep ? 400 : 150);
+                    k = 0;
+                    return [4, Promise.all([0, 1, 2].map(function () { return __awaiter(_this, void 0, void 0, function () {
+                            var g_1;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        if (!(k < jobs.length)) return [3, 2];
+                                        if (!wanted(series)) {
+                                            series.aborted = true;
+                                            return [2];
+                                        }
+                                        g_1 = jobs[k++];
+                                        tried.add(g_1.season + '|' + g_1.n);
+                                        return [4, probeEp(series, g_1.season, g_1.n)];
+                                    case 1:
+                                        _a.sent();
+                                        return [3, 0];
+                                    case 2: return [2];
+                                }
+                            });
+                        }); }))];
+                case 1:
+                    _b.sent();
+                    seasons = groupSeasons(series);
+                    _i = 0, _a = Object.keys(seasons);
+                    _b.label = 2;
+                case 2:
+                    if (!(_i < _a.length)) return [3, 6];
+                    name = _a[_i];
+                    if (!wanted(series)) {
+                        series.aborted = true;
+                        return [2];
+                    }
+                    nums = seasons[name].map(episodeNumber).filter(function (n) { return n < 9999; });
+                    if (!nums.length)
+                        return [3, 5];
+                    n = Math.max.apply(null, nums) + 1, miss = 0, left = deep ? 40 : 4;
+                    _b.label = 3;
+                case 3:
+                    if (!(miss < 2 && left-- > 0)) return [3, 5];
+                    return [4, probeEp(series, name, n)];
+                case 4:
+                    if (_b.sent())
+                        miss = 0;
+                    else
+                        miss++;
+                    n++;
+                    return [3, 3];
+                case 5:
+                    _i++;
+                    return [3, 2];
+                case 6: return [2];
+            }
+        });
+    });
+}
+function loadSeries(series, level) {
+    return __awaiter(this, void 0, void 0, function () {
+        var seen, qs, _i, _a, q;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    if (!(!series.swept || level === 2)) return [3, 5];
+                    seen = new Set();
+                    qs = buildQueries(series);
+                    if (level === 2)
+                        qs.push(baseName(series) + ' الحلقة', baseName(series));
+                    _i = 0, _a = A(new Set(qs));
+                    _b.label = 1;
+                case 1:
+                    if (!(_i < _a.length)) return [3, 4];
+                    q = _a[_i];
+                    return [4, sweep(series, q, seen, level === 2 ? 80 : 40)];
+                case 2:
+                    _b.sent();
+                    _b.label = 3;
+                case 3:
+                    _i++;
+                    return [3, 1];
+                case 4:
+                    series.swept = true;
+                    _b.label = 5;
+                case 5:
+                    if (!(level >= 1)) return [3, 8];
+                    return [4, probeSeasons(series, level === 2)];
+                case 6:
+                    _b.sent();
+                    return [4, fillGaps(series, level === 2)];
+                case 7:
+                    _b.sent();
+                    _b.label = 8;
+                case 8: return [2];
+            }
+        });
+    });
+}
+function startLoad(series, mode, force) {
+    var _a;
+    if (mode === void 0) { mode = 'light'; }
+    if (force === void 0) { force = false; }
+    var want = { light: 0, full: 1, deep: 2 }[mode];
+    if (series.loadPromise && ((_a = series.level) !== null && _a !== void 0 ? _a : -1) >= want && !force)
+        return series.loadPromise;
+    series.level = want;
+    series.loading = true;
+    if (series === activeSeries)
+        updateLoadStatus();
+    var prev = series.loadPromise || Promise.resolve();
+    var p = prev
+        .then(function () { series.aborted = false; return loadSeries(series, want); })
+        .catch(function (e) { return console.error(e); })
+        .then(function () {
+        if (series.loadPromise !== p)
+            return;
+        series.loading = false;
+        series.countReady = true;
+        if (series.aborted)
+            series.level = 0;
+        if (series.episodes.length)
+            saveCount(series.series_slug, series.episodes.length);
+        progress(series);
+        if (series === activeSeries)
+            updateLoadStatus();
+    });
+    series.loadPromise = p;
+    return p;
+}
+function queueCounts(items) {
+    items.forEach(function (i) { if (i.isSeries && !i.loadPromise)
+        pending.push(i); });
+    pump();
+}
+function pump() {
+    while (workers < MAX_WORKERS && pending.length) {
+        var it = pending.shift();
+        if (it.loadPromise)
+            continue;
+        workers++;
+        startLoad(it).finally(function () { workers--; pump(); });
+    }
+}
+function fetchCategories() {
+    return __awaiter(this, void 0, void 0, function () {
+        var cats, container_1, arr, e_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, fetchJSON("".concat(API, "?action=categories"))];
+                case 1:
+                    cats = _a.sent();
+                    container_1 = document.getElementById('catList');
+                    arr = Array.isArray(cats) ? cats : (cats.categories || cats.terms || []);
+                    arr.forEach(function (cat) {
+                        var btn = document.createElement('button');
+                        btn.className = 'cat-btn';
+                        btn.tabIndex = 0;
+                        btn.innerText = cat.name;
+                        btn.onclick = function () { return loadCategory(cat.slug, btn); };
+                        container_1.appendChild(btn);
+                    });
+                    return [3, 3];
+                case 2:
+                    e_4 = _a.sent();
+                    console.error(e_4);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+var esc = function (s) { return String(s !== null && s !== void 0 ? s : '').replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]); }); };
+document.querySelectorAll('.brand').forEach(function (el) {
+    var t = el.textContent.trim();
+    el.setAttribute('aria-label', t);
+    el.innerHTML = t.split('').map(function (c, i) { return "<span aria-hidden=\"true\" style=\"--i:".concat(i, "\">").concat(c, "</span>"); }).join('');
+});
+var AR = /[\u0600-\u06FF]/;
+function normText(s) {
+    return String(s || '').toLowerCase()
+        .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+        .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+        .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
+        .replace(/[^a-z0-9\u0600-\u06FF\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+var A2K = { 'ب': 'b', 'ت': 't', 'ث': 't', 'ج': 'k', 'ح': 'h', 'خ': 'k', 'د': 'd', 'ذ': 't', 'ر': 'r', 'ز': 's', 'س': 's', 'ش': 's', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 's', 'غ': 'k', 'ف': 'f', 'ق': 'k', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h', 'پ': 'b', 'چ': 's', 'ڤ': 'f', 'گ': 'k' };
+function skelWord(w) {
+    var o = '';
+    if (AR.test(w)) {
+        if (w.length > 3 && w.startsWith('ال'))
+            w = w.slice(2);
+        for (var i = 0; i < w.length; i++) {
+            var m = A2K[w[i]];
+            if (!m || (m === 'h' && i > 0))
+                continue;
+            o += m;
+        }
+    }
+    else {
+        w = w.replace(/ph/g, 'f').replace(/sh|ch/g, 's').replace(/th/g, 't').replace(/kh/g, 'k').replace(/ck/g, 'k')
+            .replace(/qu/g, 'k').replace(/gh/g, '').replace(/x/g, 'ks').replace(/c(?=[eiy])/g, 's')
+            .replace(/[cgjq]/g, 'k').replace(/v/g, 'f').replace(/p/g, 'b').replace(/z/g, 's');
+        for (var _i = 0, w_1 = w; _i < w_1.length; _i++) {
+            var c = w_1[_i];
+            if (!'bdfhklmnrst'.includes(c) || (c === 'h' && o))
+                continue;
+            o += c;
+        }
+    }
+    return o.replace(/(.)\1+/g, '$1');
+}
+var skel = function (s) { return normText(s).split(' ').filter(Boolean).map(skelWord).filter(Boolean).join(' '); };
+function lev1(a, b) {
+    if (Math.abs(a.length - b.length) > 1)
+        return false;
+    var i = 0, j = 0, e = 0;
+    while (i < a.length && j < b.length) {
+        if (a[i] === b[j]) {
+            i++;
+            j++;
+            continue;
+        }
+        if (++e > 1)
+            return false;
+        if (a.length > b.length)
+            i++;
+        else if (a.length < b.length)
+            j++;
+        else {
+            i++;
+            j++;
+        }
+    }
+    return e + (a.length - i) + (b.length - j) <= 1;
+}
+function scoreOf(o, qn, qp) {
+    var _a;
+    if (!o._n) {
+        o._n = normText((_a = o.t) !== null && _a !== void 0 ? _a : o.title);
+        o._p = skel(o._n);
+    }
+    var t = o._n, p = o._p;
+    var sc = 0;
+    if (t === qn)
+        sc = 1000;
+    else if (t.startsWith(qn))
+        sc = 900;
+    else if (t.includes(' ' + qn))
+        sc = 850;
+    else if (t.includes(qn))
+        sc = 700;
+    if (qp.length > 1 && p) {
+        var ps = 0;
+        if (p === qp)
+            ps = 880;
+        else if (p.startsWith(qp))
+            ps = 800;
+        else if (p.includes(' ' + qp))
+            ps = 760;
+        else if (p.includes(qp))
+            ps = 620;
+        else if (qp.length >= 4 && !qp.includes(' ') && p.split(' ').some(function (w) { return lev1(w.slice(0, qp.length), qp) || lev1(w.slice(0, qp.length + 1), qp); }))
+            ps = 420;
+        if (ps > sc)
+            sc = ps;
+    }
+    return sc ? sc - Math.min(t.length, 150) * 0.3 : 0;
+}
+var SEEDS = ('Dexter|Breaking Bad|Better Call Saul|Game of Thrones|House of the Dragon|Prison Break|Money Heist|Peaky Blinders|Vikings|The Walking Dead|Stranger Things|Friends|The Big Bang Theory|How I Met Your Mother|The Boys|Lucifer|Supernatural|Arrow|The Flash|Gotham|Smallville|The Witcher|Narcos|Ozark|The Last of Us|Squid Game|Wednesday|Sherlock|Westworld|Mr Robot|Black Mirror|Riverdale|Teen Wolf|The Vampire Diaries|Gossip Girl|Suits|Lost|Homeland|Fargo|True Detective|Shameless|Chernobyl|Mindhunter|Dark|Elite|Sex Education|Euphoria|The Crown|Bridgerton|Succession|The Mandalorian|Loki|WandaVision|Daredevil|The Punisher|Titans|Peacemaker|Reacher|Yellowstone|Ted Lasso|The Office|Brooklyn Nine-Nine|Modern Family|Greys Anatomy|The Good Doctor|Chicago Fire|NCIS|Criminal Minds|Bones|The Blacklist|Spartacus|Merlin|Outlander|Lupin|The Umbrella Academy|Cobra Kai|Arcane|Invincible|Rick and Morty|The Simpsons|Family Guy|South Park|Attack on Titan|Naruto|One Piece|Death Note|Kurulus Osman|Ertugrul|Avengers|Spider-Man|Batman|Superman|Joker|Deadpool|Iron Man|Thor|Captain America|Black Panther|Doctor Strange|Guardians of the Galaxy|Fast and Furious|John Wick|Mission Impossible|Transformers|Harry Potter|Lord of the Rings|The Hobbit|Pirates of the Caribbean|Jurassic Park|Jurassic World|Avatar|Titanic|Interstellar|Inception|Terminator|The Matrix|Gladiator|Rambo|Rocky|Die Hard|Home Alone|Frozen|Toy Story|Shrek|Minions|Kung Fu Panda|Ice Age|Aladdin|The Lion King|Moana|Encanto|Coco|Venom|Aquaman|Wonder Woman|Justice League|Black Adam|Top Gun|Oppenheimer|Barbie|Dune|Tenet|Dunkirk|Taken|Saw|The Conjuring|Annabelle|Insidious|Scream|Halloween|Final Destination|Resident Evil|Mortal Kombat|Hunger Games|Divergent|Twilight|Maze Runner|Knives Out|Extraction|Red Notice|Bullet Train|Creed|Sicario|Prisoners|Fight Club|Forrest Gump|The Godfather|Scarface').split('|');
+var SEED_SK = null;
+function seedLookup(q) {
+    var qp = skel(q);
+    if (qp.length < 2)
+        return [];
+    if (!SEED_SK)
+        SEED_SK = SEEDS.map(function (n) { return ({ n: n, p: skel(n) }); });
+    return SEED_SK.filter(function (x) { return x.p.startsWith(qp) || x.p.includes(' ' + qp); }).sort(function (a, b) { return a.p.length - b.p.length; }).slice(0, 1).map(function (x) { return x.n; });
+}
+var AR2LAT = { 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'th', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z', 'ع': 'a', 'غ': 'g', 'ف': 'f', 'ق': 'k', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h' };
+function arWordToLat(w, ve) {
+    var _a;
+    var s = '';
+    for (var i = 0; i < w.length; i++) {
+        var c = w[i], n = w[i + 1];
+        if (c === 'ك' && n === 'س') {
+            s += 'x';
+            i++;
+        }
+        else if (c === 'ي')
+            s += i === 0 ? 'y' : ve;
+        else if (c === 'و')
+            s += i === 0 ? 'w' : 'o';
+        else if ('اءئؤ'.includes(c))
+            s += 'a';
+        else
+            s += (_a = AR2LAT[c]) !== null && _a !== void 0 ? _a : '';
+    }
+    if (!/[aeiou]/.test(s))
+        s = s.replace(/^([^aeiou])([^aeiou])/, '$1e$2');
+    return s.replace(/([^aeiou])r$/, '$1er');
+}
+var LAT2AR = { a: 'ا', b: 'ب', c: 'ك', d: 'د', f: 'ف', g: 'ج', h: 'ه', j: 'ج', k: 'ك', l: 'ل', m: 'م', n: 'ن', p: 'ب', q: 'ق', r: 'ر', s: 'س', t: 'ت', v: 'ف', w: 'و', y: 'ي', z: 'ز' };
+function latWordToAr(w, longV) {
+    var _a;
+    w = w.replace(/e$/, '').replace(/er$/, 'r')
+        .replace(/ph/g, 'f').replace(/sh/g, '$').replace(/ch/g, '#').replace(/th/g, '^').replace(/kh/g, '&').replace(/ck/g, 'k').replace(/x/g, '@');
+    var o = '', seenV = false;
+    for (var i = 0; i < w.length; i++) {
+        var c = w[i];
+        if (c === '$')
+            o += 'ش';
+        else if (c === '#')
+            o += 'تش';
+        else if (c === '^')
+            o += 'ث';
+        else if (c === '&')
+            o += 'خ';
+        else if (c === '@')
+            o += 'كس';
+        else if ('aeiou'.includes(c)) {
+            if (i === 0)
+                o += 'ا';
+            else if (longV && !seenV)
+                o += (c === 'o' || c === 'u') ? 'و' : (c === 'a' ? 'ا' : 'ي');
+            seenV = true;
+        }
+        else
+            o += (_a = LAT2AR[c]) !== null && _a !== void 0 ? _a : '';
+    }
+    return o;
+}
+function buildVariants(q) {
+    var out = [q.trim()];
+    var words = normText(q).split(' ').filter(Boolean);
+    var ar = AR.test(q), lat = /[a-z]/i.test(q);
+    var add = function (v) { v = (v || '').trim(); if (v.length > 1 && !out.some(function (o) { return o.toLowerCase() === v.toLowerCase(); }))
+        out.push(v); };
+    if (ar && !lat) {
+        seedLookup(q).forEach(add);
+        add(words.map(function (w) { return arWordToLat(w, 'e'); }).join(' '));
+        add(words.map(function (w) { return arWordToLat(w, 'i'); }).join(' '));
+    }
+    else if (lat && !ar) {
+        add(words.map(function (w) { return latWordToAr(w, true); }).join(' '));
+        add(words.map(function (w) { return latWordToAr(w, false); }).join(' '));
+    }
+    return out.slice(0, 3);
+}
+var IDX_KEY = 'alm_idx_v1', CNT_KEY = 'alm_cnt_v1';
+var idx = new Map();
+var movieMap = new Map();
+var idxT, cntT, cnt = {};
+try {
+    cnt = JSON.parse(localStorage.getItem(CNT_KEY) || '{}');
+}
+catch (e) {
+    cnt = {};
+}
+function loadIndex() {
+    try {
+        JSON.parse(localStorage.getItem(IDX_KEY) || '[]').forEach(function (e) { if (e && e.k && e.t && !idx.has(e.k))
+            idx.set(e.k, e); });
+    }
+    catch (e) { }
+}
+window.requestIdleCallback ? requestIdleCallback(loadIndex, { timeout: 1500 }) : setTimeout(loadIndex, 300);
+function indexItem(item) {
+    if (idx.has(item.key))
+        return;
+    idx.set(item.key, item.isSeries
+        ? { k: item.key, t: item.title, th: item.thumbnail, s: item.series_slug, i: item.infoName }
+        : { k: item.key, t: item.title, th: item.thumbnail, r: item.realid });
+    if (idx.size > 2500)
+        idx.delete(idx.keys().next().value);
+    clearTimeout(idxT);
+    idxT = setTimeout(function () {
+        try {
+            localStorage.setItem(IDX_KEY, JSON.stringify(A(idx.values()).map(function (e) { return ({ k: e.k, t: e.t, th: e.th, s: e.s, r: e.r, i: e.i }); })));
+        }
+        catch (e) { }
+    }, 4000);
+}
+function cachedCount(slug) {
+    var c = cnt[slug];
+    return c && Date.now() - c.t < 12 * 3600e3 ? c.n : 0;
+}
+function saveCount(slug, n) {
+    cnt[slug] = { n: n, t: Date.now() };
+    clearTimeout(cntT);
+    cntT = setTimeout(function () {
+        var ks = Object.keys(cnt);
+        if (ks.length > 800)
+            ks.sort(function (a, b) { return cnt[a].t - cnt[b].t; }).slice(0, ks.length - 800).forEach(function (k) { return delete cnt[k]; });
+        try {
+            localStorage.setItem(CNT_KEY, JSON.stringify(cnt));
+        }
+        catch (e) { }
+    }, 1500);
+}
+function newSeries(d) {
+    var s = {
+        isSeries: true, key: 's' + d.series_slug, series_slug: d.series_slug, title: d.title, infoName: d.infoName || '',
+        thumbnail: d.thumbnail, story: d.story || '', episodes: [], countReady: false, loading: false, loadPromise: null,
+        badgeEl: null, cached: cachedCount(d.series_slug)
+    };
+    seriesMap.set(d.series_slug, s);
+    return s;
+}
+function newMovie(key, d) {
+    var m = { isSeries: false, key: key, title: d.title, thumbnail: d.thumbnail, realid: d.realid, story: d.story || '' };
+    movieMap.set(key, m);
+    return m;
+}
+function itemFromPost(post) {
+    var _a, _b, _c, _d, _e, _f;
+    if (post.series_slug) {
+        var s = seriesMap.get(post.series_slug) || newSeries({
+            series_slug: post.series_slug, title: ((_a = post.series_info) === null || _a === void 0 ? void 0 : _a.name) || post.movie_season || post.title,
+            infoName: ((_b = post.series_info) === null || _b === void 0 ? void 0 : _b.name) || '', thumbnail: post.thumbnail, story: ((_c = post.meta) === null || _c === void 0 ? void 0 : _c.story) || ''
+        });
+        addEpisodes(s, [post]);
+        return s;
+    }
+    var key = 'm' + ((_e = (_d = post.realid) !== null && _d !== void 0 ? _d : post.slug) !== null && _e !== void 0 ? _e : post.title);
+    return movieMap.get(key) || newMovie(key, { title: post.title, thumbnail: post.thumbnail, realid: post.realid, story: ((_f = post.meta) === null || _f === void 0 ? void 0 : _f.story) || '' });
+}
+function itemFromEntry(e) {
+    if (e.s)
+        return seriesMap.get(e.s) || newSeries({ series_slug: e.s, title: e.t, infoName: e.i, thumbnail: e.th });
+    return movieMap.get(e.k) || newMovie(e.k, { title: e.t, thumbnail: e.th, realid: e.r });
+}
+var rendered = [];
+var countObserver = window.IntersectionObserver ? new IntersectionObserver(function (es) {
+    es.forEach(function (en) {
+        if (!en.isIntersecting)
+            return;
+        countObserver.unobserve(en.target);
+        var it = en.target._item;
+        if (it && it.isSeries && !it.loadPromise && !it.cached)
+            pending.push(it);
+    });
+    pump();
+}, { rootMargin: '300px' }) : null;
+function clearGrid() {
+    rendered = [];
+    if (countObserver)
+        countObserver.disconnect();
+    document.getElementById('movieGrid').innerHTML = '';
+}
+function renderCards(items) {
+    var frag = document.createDocumentFragment();
+    items.forEach(function (item) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.tabIndex = 0;
+        var open = item.isSeries ? function () { return openSeriesModal(item); } : function () { return playMovie(item.realid, item.title); };
+        card.onclick = open;
+        card.addEventListener('keydown', function (e) { if (e.key === 'Enter')
+            open(); });
+        card.innerHTML = "<div class=\"poster-wrap\"><img src=\"".concat(esc(item.thumbnail), "\" alt=\"").concat(esc(item.title), "\" loading=\"lazy\" decoding=\"async\" /></div><h3>").concat(esc(item.title), "</h3>");
+        var fav = document.createElement('button');
+        fav.className = 'fav-btn' + (isFav(item.key) ? ' on' : '');
+        fav.dataset.k = item.key;
+        fav.tabIndex = -1;
+        fav.setAttribute('aria-label', 'المفضلة');
+        fav.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.4C1 8.3 2.7 5 6 4.6c2-.2 4 .8 6 3.1 2-2.3 4-3.3 6-3.1 3.3.4 5 3.7 3.6 7C19.5 16.4 12 21 12 21z"/></svg>';
+        fav.onclick = function (e) { e.stopPropagation(); toggleFav(item); };
+        card.querySelector('.poster-wrap').appendChild(fav);
+        if (item.isSeries) {
+            var badge = document.createElement('span');
+            badge.className = 'ep-badge';
+            badge.textContent = badgeText(item);
+            item.badgeEl = badge;
+            card._item = item;
+            card.querySelector('.poster-wrap').appendChild(badge);
+            if (countObserver)
+                countObserver.observe(card);
+            else
+                pending.push(item);
+        }
+        frag.appendChild(card);
+        rendered.push(item.key);
+    });
+    document.getElementById('movieGrid').appendChild(frag);
+    if (!countObserver)
+        pump();
+}
+function syncGrid(items) {
+    var same = rendered.length <= items.length;
+    for (var i = 0; i < rendered.length && same; i++)
+        if (rendered[i] !== items[i].key)
+            same = false;
+    if (!same || !rendered.length)
+        clearGrid();
+    var add = items.slice(rendered.length);
+    if (add.length)
+        renderCards(add);
+}
+function updateMoreBtn() {
+    var show = searchMode ? (sq.pool.size > 0 && (sq.pool.size > sq.limit || sq.hasMore)) : (hasMore && shownKeys.size > 0);
+    var busy = searchMode ? sq.busy : loadingMore;
+    document.getElementById('moreWrap').style.display = show ? 'flex' : 'none';
+    document.getElementById('moreBtn').disabled = busy;
+    document.getElementById('moreLabel').textContent = busy ? 'جاري التحميل...' : 'المزيد';
+}
+function pageUrl(page) {
+    return currentCategory ? "".concat(API, "?action=posts&category=").concat(currentCategory, "&page=").concat(page) : "".concat(API, "?action=posts&page=").concat(page);
+}
+function addPosts(posts) {
+    var newItems = [];
+    var unseen = 0;
+    posts.forEach(function (post) {
+        var _a, _b;
+        var pid = (_b = (_a = post.realid) !== null && _a !== void 0 ? _a : post.slug) !== null && _b !== void 0 ? _b : post.title;
+        if (seenPostIds.has(pid))
+            return;
+        seenPostIds.add(pid);
+        unseen++;
+        var item = itemFromPost(post);
+        indexItem(item);
+        if (!shownKeys.has(item.key)) {
+            shownKeys.add(item.key);
+            newItems.push(item);
+        }
+    });
+    return { newItems: newItems, unseen: unseen };
+}
+function loadMore() {
+    return __awaiter(this, arguments, void 0, function (reset) {
+        var token, grid, target, added, fetches, stalls, failed, firstRender, data, posts, _a, newItems, unseen, e_5;
+        if (reset === void 0) { reset = false; }
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    if (searchMode && !reset)
+                        return [2, searchMore()];
+                    if (loadingMore && !reset)
+                        return [2];
+                    token = reset ? ++listToken : listToken;
+                    grid = document.getElementById('movieGrid');
+                    if (reset) {
+                        currentPage = 1;
+                        hasMore = true;
+                        pending.length = 0;
+                        shownKeys.clear();
+                        seenPostIds.clear();
+                        clearGrid();
+                        grid.innerHTML = '<p class="muted">جاري التحميل...</p>';
+                    }
+                    loadingMore = true;
+                    updateMoreBtn();
+                    target = isMobile() ? 9 : 14;
+                    added = 0, fetches = 0, stalls = 0, failed = false;
+                    firstRender = reset;
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 5, , 6]);
+                    _b.label = 2;
+                case 2:
+                    if (!(added < target && hasMore && fetches < 8)) return [3, 4];
+                    return [4, fetchJSON(pageUrl(currentPage))];
+                case 3:
+                    data = _b.sent();
+                    if (token !== listToken)
+                        return [2];
+                    fetches++;
+                    posts = (data === null || data === void 0 ? void 0 : data.posts) || [];
+                    if (!posts.length) {
+                        hasMore = false;
+                        return [3, 4];
+                    }
+                    currentPage++;
+                    _a = addPosts(posts), newItems = _a.newItems, unseen = _a.unseen;
+                    if (unseen === 0) {
+                        if (++stalls >= 2) {
+                            hasMore = false;
+                            return [3, 4];
+                        }
+                        return [3, 2];
+                    }
+                    stalls = 0;
+                    if (firstRender) {
+                        grid.innerHTML = '';
+                        firstRender = false;
+                    }
+                    renderCards(newItems);
+                    added += newItems.length;
+                    return [3, 2];
+                case 4: return [3, 6];
+                case 5:
+                    e_5 = _b.sent();
+                    console.error(e_5);
+                    failed = true;
+                    return [3, 6];
+                case 6:
+                    if (token !== listToken)
+                        return [2];
+                    loadingMore = false;
+                    if (shownKeys.size === 0) {
+                        grid.innerHTML = failed ? '<p class="muted">حدث خطأ أثناء تحميل البيانات.</p>' : '<p class="muted">لا توجد نتائج لعرضها.</p>';
+                    }
+                    updateMoreBtn();
+                    return [2];
+            }
+        });
+    });
+}
+var searchMode = false, searchDebounce, syncRaf = 0;
+var sq = { id: 0, ctrl: null, timer: 0, q: '', qn: '', qp: '', variants: [], page: 1, hasMore: false, busy: false, waiting: false, limit: 18, pool: new Map(), pendingReqs: 0 };
+var sCache = new Map();
+var sInput = document.getElementById('searchInput');
+var STEP = function () { return isMobile() ? 18 : 24; };
+function getSearch(v, page, signal) {
+    return __awaiter(this, void 0, void 0, function () {
+        var k, r, d;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    k = v + '|' + page;
+                    if (sCache.has(k))
+                        return [2, sCache.get(k)];
+                    return [4, fetch("".concat(API, "?action=search&search=").concat(encodeURIComponent(v), "&page=").concat(page), { signal: signal })];
+                case 1:
+                    r = _a.sent();
+                    return [4, r.json()];
+                case 2:
+                    d = _a.sent();
+                    sCache.set(k, d);
+                    if (sCache.size > 80)
+                        sCache.delete(sCache.keys().next().value);
+                    return [2, d];
+            }
+        });
+    });
+}
+function poolAdd(item, sc) {
+    var cur = sq.pool.get(item.key);
+    if (!cur || sc > cur.sc)
+        sq.pool.set(item.key, { item: item, sc: sc });
+}
+var sortedPool = function () { return A(sq.pool.values()).sort(function (a, b) { return b.sc - a.sc || a.item.title.length - b.item.title.length; }); };
+function scheduleSync() {
+    if (syncRaf)
+        return;
+    syncRaf = requestAnimationFrame(function () { syncRaf = 0; renderSearch(); });
+}
+function renderSearch() {
+    if (!searchMode)
+        return;
+    var all = sortedPool();
+    syncGrid(all.slice(0, sq.limit).map(function (x) { return x.item; }));
+    if (!all.length) {
+        document.getElementById('movieGrid').innerHTML = "<p class=\"muted\">".concat((sq.pendingReqs > 0 || sq.waiting) ? 'جاري البحث...' : 'لا توجد نتائج لعرضها.', "</p>");
+    }
+    updateMoreBtn();
+}
+function fetchSearchPage(id, page) {
+    return __awaiter(this, void 0, void 0, function () {
+        var vs, any;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    vs = sq.variants;
+                    any = false;
+                    sq.waiting = false;
+                    sq.pendingReqs += vs.length;
+                    return [4, Promise.all(vs.map(function (v, vi) { return __awaiter(_this, void 0, void 0, function () {
+                            var data, posts, e_6;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        _a.trys.push([0, 2, 3, 4]);
+                                        return [4, getSearch(v, page, sq.ctrl.signal)];
+                                    case 1:
+                                        data = _a.sent();
+                                        if (id !== sq.id)
+                                            return [2];
+                                        posts = (data === null || data === void 0 ? void 0 : data.posts) || [];
+                                        if (posts.length)
+                                            any = true;
+                                        posts.forEach(function (p, pi) {
+                                            var item = itemFromPost(p);
+                                            indexItem(item);
+                                            poolAdd(item, scoreOf(item, sq.qn, sq.qp) || (100 - Math.min(vi * 10 + pi, 90)));
+                                        });
+                                        return [3, 4];
+                                    case 2:
+                                        e_6 = _a.sent();
+                                        return [3, 4];
+                                    case 3:
+                                        if (id === sq.id) {
+                                            sq.pendingReqs--;
+                                            scheduleSync();
+                                        }
+                                        return [7];
+                                    case 4: return [2];
+                                }
+                            });
+                        }); }))];
+                case 1:
+                    _a.sent();
+                    if (id === sq.id && page === sq.page)
+                        sq.hasMore = any;
+                    return [2];
+            }
+        });
+    });
+}
+function runSearch(q, delay) {
+    if (delay === void 0) { delay = 160; }
+    var id = ++sq.id;
+    if (sq.ctrl)
+        sq.ctrl.abort();
+    clearTimeout(sq.timer);
+    sq.ctrl = new AbortController();
+    Object.assign(sq, { q: q, qn: normText(q), qp: skel(q), page: 1, hasMore: false, busy: false, waiting: false, limit: STEP(), pool: new Map(), pendingReqs: 0 });
+    if (favMode) {
+        favWas = true;
+        favMode = false;
+    }
+    searchMode = true;
+    loadingMore = false;
+    listToken++;
+    pending.length = 0;
+    var hits = [];
+    idx.forEach(function (e) { var sc = scoreOf(e, sq.qn, sq.qp); if (sc)
+        hits.push([sc, e]); });
+    hits.sort(function (a, b) { return b[0] - a[0]; }).slice(0, 80).forEach(function (_a) {
+        var sc = _a[0], e = _a[1];
+        return poolAdd(itemFromEntry(e), sc);
+    });
+    if (sq.qn.length >= 2) {
+        sq.variants = buildVariants(q);
+        sq.waiting = true;
+        sq.timer = setTimeout(function () { return fetchSearchPage(id, 1); }, delay);
+    }
+    renderSearch();
+}
+function searchMore() {
+    return __awaiter(this, void 0, void 0, function () {
+        var id;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (sq.busy)
+                        return [2];
+                    if (sq.pool.size > sq.limit) {
+                        sq.limit += STEP();
+                        renderSearch();
+                        return [2];
+                    }
+                    if (!sq.hasMore)
+                        return [2];
+                    sq.busy = true;
+                    updateMoreBtn();
+                    id = sq.id;
+                    sq.page++;
+                    return [4, fetchSearchPage(id, sq.page)];
+                case 1:
+                    _a.sent();
+                    if (id !== sq.id)
+                        return [2];
+                    sq.limit += STEP();
+                    sq.busy = false;
+                    renderSearch();
+                    return [2];
+            }
+        });
+    });
+}
+function leaveSearch() {
+    if (!searchMode)
+        return;
+    searchMode = false;
+    sq.id++;
+    clearTimeout(sq.timer);
+    if (sq.ctrl)
+        sq.ctrl.abort();
+    sq.pool = new Map();
+    if (favWas) {
+        favWas = false;
+        favMode = true;
+        renderFavs();
+        return;
+    }
+    loadMore(true);
+}
+sInput.addEventListener('input', function () {
+    clearTimeout(searchDebounce);
+    var v = sInput.value.trim();
+    if (!v) {
+        leaveSearch();
+        return;
+    }
+    runSearch(v);
+});
+var seriesModal = document.getElementById('seriesModal');
+var seasonPinned = false;
+function openSeriesModal(series) {
+    activeSeries = series;
+    activeSeasonName = null;
+    seasonPinned = false;
+    var th = series.thumbnail || '';
+    document.getElementById('seriesPoster').src = th;
+    document.getElementById('smBg').style.backgroundImage = th ? "url(\"".concat(th.replace(/"/g, '%22'), "\")") : 'none';
+    document.getElementById('seriesTitle').innerText = series.title;
+    var st = document.getElementById('seriesStory');
+    st.innerText = series.story || 'لا يوجد وصف متاح.';
+    st.classList.remove('open');
+    seriesModal.classList.add('show');
+    seriesModal.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    startLoad(series, 'full');
+    updateBadge(series);
+    renderSeries();
+    updateLoadStatus();
+    syncFavUI();
+    if (!('ontouchstart' in window))
+        setTimeout(function () { var b = document.getElementById('smPlay'); if (b && activeSeries === series)
+            b.focus(); }, 60);
+}
+function groupSeasons(series) {
+    var seasons = {};
+    series.episodes.forEach(function (ep) {
+        var name = seasonNameOf(ep);
+        (seasons[name] = seasons[name] || []).push(ep);
+    });
+    return seasons;
+}
+function lastMap() { try {
+    return JSON.parse(localStorage.getItem('alm_last_v1') || '{}');
+}
+catch (e) {
+    return {};
+} }
+function setLast(slug, id) {
+    var m = lastMap();
+    delete m[slug];
+    m[slug] = id;
+    var ks = Object.keys(m);
+    if (ks.length > 300)
+        delete m[ks[0]];
+    try {
+        localStorage.setItem('alm_last_v1', JSON.stringify(m));
+    }
+    catch (e) { }
+}
+function orderedEps(s) {
+    return s.episodes.slice().sort(function (a, b) { return seasonOrder(seasonNameOf(a)) - seasonOrder(seasonNameOf(b)) || seasonNameOf(a).localeCompare(seasonNameOf(b), 'ar') || episodeNumber(a) - episodeNumber(b); });
+}
+function playTarget(s) {
+    var last = lastMap()[s.series_slug];
+    return (last && s.episodes.find(function (e) { return String(e.realid) === String(last); })) || orderedEps(s)[0] || null;
+}
+function updatePlayBtn(series) {
+    var t = playTarget(series), txt = document.getElementById('smPlayTxt');
+    var last = lastMap()[series.series_slug];
+    var isLast = t && last && String(t.realid) === String(last);
+    var n = t ? episodeNumber(t) : 0;
+    txt.textContent = !t ? (series.loading ? 'جاري التحميل…' : 'لا توجد حلقات') : isLast ? "\u0645\u062A\u0627\u0628\u0639\u0629".concat(n < 9999 ? ' · الحلقة ' + n : '') : 'ابدأ المشاهدة';
+}
+function renderSeries() {
+    var _this = this;
+    var series = activeSeries;
+    if (!series)
+        return;
+    var seasons = groupSeasons(series);
+    var names = Object.keys(seasons).sort(function (a, b) { return seasonOrder(a) - seasonOrder(b) || a.localeCompare(b, 'ar'); });
+    var tabs = document.getElementById('seasonTabs');
+    var grid = document.getElementById('episodesGrid');
+    var ae = document.activeElement;
+    var focusedTab = ae && ae.classList && ae.classList.contains('season-tab') ? ae.dataset.name : null;
+    var focusedEp = ae && ae.classList && ae.classList.contains('episode-btn') ? (ae.dataset.id || 'g' + ae.dataset.gap) : null;
+    updatePlayBtn(series);
+    document.getElementById('seasonsCount').textContent = names.length > 1 ? "".concat(names.length, " \u0645\u0648\u0627\u0633\u0645") : '';
+    tabs.innerHTML = '';
+    if (names.length === 0) {
+        tabs.innerHTML = "<span class=\"sm-empty\">".concat(series.loading ? 'جاري جلب الحلقات…' : 'لا توجد حلقات متاحة.', "</span>");
+        grid.innerHTML = '';
+        return;
+    }
+    if (!seasonPinned || !seasons[activeSeasonName]) {
+        var last_1 = lastMap()[series.series_slug];
+        var le = last_1 && series.episodes.find(function (e) { return String(e.realid) === String(last_1); });
+        activeSeasonName = le ? seasonNameOf(le) : names[0];
+    }
+    names.forEach(function (name) {
+        var btn = document.createElement('button');
+        btn.className = 'season-tab' + (name === activeSeasonName ? ' active' : '');
+        btn.dataset.name = name;
+        btn.tabIndex = 0;
+        btn.innerHTML = names.length > 1 ? "".concat(esc(name), "<small>").concat(seasons[name].length, "</small>") : esc(name);
+        btn.onclick = function () { activeSeasonName = name; seasonPinned = true; renderSeries(); };
+        tabs.appendChild(btn);
+    });
+    var list = seasons[activeSeasonName];
+    var byNum = new Map(), unknown = [];
+    list.forEach(function (ep) { var n = episodeNumber(ep); if (n < 9999) {
+        if (!byNum.has(n))
+            byNum.set(n, ep);
+    }
+    else
+        unknown.push(ep); });
+    var max = byNum.size ? Math.max.apply(null, A(byNum.keys())) : 0;
+    var last = lastMap()[series.series_slug];
+    var showGaps = series.countReady && !series.loading && max <= 500;
+    var frag = document.createDocumentFragment();
+    var tile = function (ep, n) {
+        var b = document.createElement('button');
+        b.className = 'episode-btn' + (String(ep.realid) === String(last) ? ' last' : '');
+        b.dataset.id = ep.realid;
+        b.tabIndex = 0;
+        b.title = 'الحلقة ' + n;
+        b.innerHTML = "<b>".concat(n, "</b>");
+        var go = function () { var s = activeSeries || series; closeSeriesModal(); playMovie(ep.realid, ep.title, s); };
+        b.onclick = go;
+        b.addEventListener('keydown', function (e) { if (e.key === 'Enter') {
+            e.preventDefault();
+            go();
+        } });
+        return b;
+    };
+    var gapTile = function (n) {
+        var b = document.createElement('button');
+        b.className = 'episode-btn gap';
+        b.dataset.gap = n;
+        b.tabIndex = 0;
+        b.title = 'الحلقة ' + n + ' غير محمّلة — اضغط للمحاولة';
+        b.innerHTML = "<b>".concat(n, "</b>");
+        var season = activeSeasonName;
+        var go = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (b.classList.contains('busy'))
+                            return [2];
+                        b.classList.add('busy');
+                        return [4, probeEp(series, season, n)];
+                    case 1:
+                        _a.sent();
+                        if (activeSeries === series) {
+                            renderSeries();
+                            updateLoadStatus();
+                        }
+                        return [2];
+                }
+            });
+        }); };
+        b.onclick = go;
+        b.addEventListener('keydown', function (e) { if (e.key === 'Enter') {
+            e.preventDefault();
+            go();
+        } });
+        return b;
+    };
+    for (var n = 1; n <= max; n++) {
+        if (byNum.has(n))
+            frag.appendChild(tile(byNum.get(n), n));
+        else if (showGaps)
+            frag.appendChild(gapTile(n));
+    }
+    unknown.forEach(function (ep) { return frag.appendChild(tile(ep, '?')); });
+    grid.innerHTML = '';
+    grid.appendChild(frag);
+    if (focusedTab) {
+        var t = Array.from(tabs.children).find(function (el) { return el.dataset.name === focusedTab; });
+        if (t)
+            t.focus();
+    }
+    else if (focusedEp) {
+        var b = Array.from(grid.children).find(function (el) { return (el.dataset.id || 'g' + el.dataset.gap) === focusedEp; });
+        if (b)
+            b.focus();
+    }
+}
+function closeSeriesModal() {
+    activeSeries = null;
+    document.getElementById('loadStatus').style.display = 'none';
+    seriesModal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+var $ = function (id) { return document.getElementById(id); };
+var video = $('videoPlayer');
+var modal = $('playerModal');
+var stage = $('plStage');
+var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+var S = function (p) { return "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">".concat(p, "</svg>"); };
+var F = function (p) { return "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\">".concat(p, "</svg>"); };
+var SPK = '<path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z" fill="currentColor"/>';
+var ICON = {
+    play: F('<path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/>'),
+    pause: F('<rect x="6" y="5" width="4.5" height="14" rx="1.4"/><rect x="13.5" y="5" width="4.5" height="14" rx="1.4"/>'),
+    back10: F('<path d="M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/><text x="12" y="16.3" font-size="7.2" font-weight="800" text-anchor="middle" font-family="Arial,sans-serif">10</text>'),
+    fwd10: F('<path d="M12 5V2l5 4-5 4V7a6 6 0 1 0 6 6h2a8 8 0 1 1-8-8z"/><text x="12" y="16.3" font-size="7.2" font-weight="800" text-anchor="middle" font-family="Arial,sans-serif">10</text>'),
+    close: S('<path d="M6 6l12 12M18 6L6 18"/>'),
+    list: S('<path d="M4 6h11M4 12h11M4 18h7"/><path d="M18 13v7l5-3.5z" fill="currentColor"/>'),
+    hd: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2.5" y="5" width="19" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><text x="12" y="15" font-size="7.5" font-weight="800" text-anchor="middle" font-family="Arial,sans-serif">HD</text></svg>',
+    vol: S(SPK + '<path d="M15.5 9a4.5 4.5 0 0 1 0 6M18.2 6.5a8 8 0 0 1 0 11"/>'),
+    mute: S(SPK + '<path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
+    sun: S('<circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>'),
+    fs: S('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+    fsx: S('<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>'),
+    warn: S('<path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>'),
+    heart: S('<path d="M12 21s-7.5-4.6-9.6-9.4C1 8.3 2.7 5 6 4.6c2-.2 4 .8 6 3.1 2-2.3 4-3.3 6-3.1 3.3.4 5 3.7 3.6 7C19.5 16.4 12 21 12 21z"/>'),
+    cast: S('<path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M3 12a9 9 0 0 1 9 9M3 16a5 5 0 0 1 5 5M3 20h.01"/>')
+};
+var ASPECTS = [
+    { fit: 'contain', t: '', icon: S('<rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="8" y="9" width="8" height="6" rx="1" fill="currentColor"/>') },
+    { fit: 'cover', t: '', icon: S('<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M9 8.5H7.5V10M15 8.5h1.5V10M9 15.5H7.5V14M15 15.5h1.5V14"/>') },
+    { fit: 'fill', t: '', icon: S('<path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/>') },
+    { fit: 'cover', t: 'scale(1.2)', icon: S('<circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15l5 5M8.5 10.5h4M10.5 8.5v4"/>') }
+];
+document.querySelectorAll('[data-icon]').forEach(function (el) { return el.innerHTML = ICON[el.dataset.icon]; });
+var plToken = 0, playerSeries = null, playerEpId = null, plSeason = null;
+var uiOn = true, panelOpen = false, seeking = false, raf = 0, lastSec = -1, lastDur = -1, lastMove = 0;
+var hideTimer, hudTimer, toastTimer, aspectIdx = 0, brightness = 1, qList = [], qPos = 0, netRetries = 0;
+var plOpen = function () { return modal.classList.contains('show'); };
+var isFs = function () { return document.fullscreenElement || document.webkitFullscreenElement; };
+function fmt(sec) {
+    if (!isFinite(sec) || sec < 0)
+        sec = 0;
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = Math.floor(sec % 60);
+    return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+}
+function showUI() {
+    uiOn = true;
+    modal.classList.add('ui-on');
+    clearTimeout(hideTimer);
+    kick();
+    if (!video.paused && !panelOpen)
+        hideTimer = setTimeout(hideUI, 3200);
+}
+function hideUI() {
+    if (seeking || panelOpen)
+        return;
+    uiOn = false;
+    modal.classList.remove('ui-on');
+}
+function setLoading(on) { modal.classList.toggle('loading', on); }
+function toast(content, isHtml) {
+    var t = $('plToast');
+    if (isHtml)
+        t.innerHTML = content;
+    else
+        t.textContent = content;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { return t.classList.remove('show'); }, 1400);
+}
+function showHud(kind, pct) {
+    var hud = $('plHud');
+    hud.className = 'pl-hud show ' + (kind === 'vol' ? 'right' : 'left');
+    $('plHudIcon').innerHTML = kind === 'vol' ? (pct === 0 ? ICON.mute : ICON.vol) : ICON.sun;
+    $('plHudFill').style.transform = "scaleY(".concat(pct, ")");
+    clearTimeout(hudTimer);
+    hudTimer = setTimeout(function () { return hud.classList.remove('show'); }, 800);
+}
+function setProg(p) {
+    $('plPlayed').style.transform = "scaleX(".concat(p, ")");
+    $('plThumb').style.left = (p * 100) + '%';
+}
+function updateProgress() {
+    if (seeking)
+        return;
+    var d = video.duration || 0, t = video.currentTime || 0;
+    setProg(d ? t / d : 0);
+    var sec = Math.floor(t);
+    if (sec !== lastSec) {
+        lastSec = sec;
+        $('plCur').textContent = fmt(t);
+    }
+    if (d && Math.floor(d) !== lastDur) {
+        lastDur = Math.floor(d);
+        $('plDur').textContent = fmt(d);
+    }
+    var be = 0;
+    var b = video.buffered;
+    for (var i = 0; i < b.length; i++)
+        if (b.start(i) <= t + 0.5 && b.end(i) >= t) {
+            be = b.end(i);
+            break;
+        }
+    $('plBuf').style.transform = "scaleX(".concat(d ? clamp(be / d, 0, 1) : 0, ")");
+}
+function loop() {
+    raf = 0;
+    updateProgress();
+    if (uiOn && !video.paused && plOpen())
+        raf = requestAnimationFrame(loop);
+}
+function kick() { if (!raf)
+    raf = requestAnimationFrame(loop); }
+var seek = $('plSeek');
+var seekPct = function (e) { var r = seek.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 1); };
+seek.addEventListener('pointerdown', function (e) {
+    if (!video.duration)
+        return;
+    seeking = true;
+    seek.classList.add('drag');
+    seek.setPointerCapture(e.pointerId);
+    var p = seekPct(e);
+    setProg(p);
+    $('plCur').textContent = fmt(p * video.duration);
+    showUI();
+});
+seek.addEventListener('pointermove', function (e) {
+    if (!seeking)
+        return;
+    var p = seekPct(e);
+    setProg(p);
+    $('plCur').textContent = fmt(p * video.duration);
+});
+seek.addEventListener('pointerup', function (e) {
+    if (!seeking)
+        return;
+    seeking = false;
+    seek.classList.remove('drag');
+    video.currentTime = seekPct(e) * video.duration;
+    showUI();
+});
+seek.addEventListener('pointercancel', function () { seeking = false; seek.classList.remove('drag'); });
+function togglePlay() { video.paused ? safePlay(video) : video.pause(); }
+function skip(sec) {
+    video.currentTime = clamp(video.currentTime + sec, 0, video.duration || 1e9);
+    showUI();
+}
+function setVolume(v) {
+    v = clamp(v, 0, 1);
+    video.volume = v;
+    video.muted = v === 0;
+    showHud('vol', v);
+}
+function setBrightness(b) {
+    brightness = clamp(b, 0.3, 1.7);
+    video.style.filter = brightness === 1 ? '' : "brightness(".concat(brightness, ")");
+    showHud('bright', (brightness - 0.3) / 1.4);
+}
+function cycleAspect() {
+    aspectIdx = (aspectIdx + 1) % ASPECTS.length;
+    var a = ASPECTS[aspectIdx];
+    video.style.objectFit = a.fit;
+    video.style.transform = a.t;
+    $('plAspectIc').innerHTML = a.icon;
+    toast(a.icon, true);
+    showUI();
+}
+function levelLabel(i) { var l = hls.levels[i]; return l.height ? String(l.height) : Math.round(l.bitrate / 1000) + 'k'; }
+function buildQualities() {
+    if (!hls || !hls.levels || hls.levels.length < 2)
+        return;
+    var best = new Map();
+    hls.levels.forEach(function (l, i) {
+        var h = l.height || l.bitrate;
+        var prev = best.get(h);
+        if (prev === undefined || hls.levels[prev].bitrate < l.bitrate)
+            best.set(h, i);
+    });
+    qList = [-1].concat(A(best.entries()).sort(function (a, b) { return b[0] - a[0]; }).map(function (e) { return e[1]; }));
+    qPos = 0;
+    if (qList.length > 2) {
+        $('plQuality').style.display = 'flex';
+        $('plQBadge').textContent = 'A';
+    }
+}
+function cycleQuality() {
+    if (!hls || qList.length < 3)
+        return;
+    qPos = (qPos + 1) % qList.length;
+    hls.currentLevel = qList[qPos];
+    var auto = qList[qPos] === -1;
+    $('plQBadge').textContent = auto ? 'A' : levelLabel(qList[qPos]);
+    toast(auto ? 'AUTO' : levelLabel(qList[qPos]) + 'p');
+    showUI();
+}
+function toggleFs() {
+    return __awaiter(this, void 0, void 0, function () {
+        var e_7, e_8;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (isFs()) {
+                        try {
+                            (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+                        }
+                        catch (e) { }
+                        try {
+                            screen.orientation.unlock();
+                        }
+                        catch (e) { }
+                        return [2];
+                    }
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 5, , 6]);
+                    if (!stage.requestFullscreen) return [3, 3];
+                    return [4, stage.requestFullscreen({ navigationUI: 'hide' })];
+                case 2:
+                    _a.sent();
+                    return [3, 4];
+                case 3:
+                    if (stage.webkitRequestFullscreen)
+                        stage.webkitRequestFullscreen();
+                    else if (video.webkitEnterFullscreen) {
+                        video.webkitEnterFullscreen();
+                        return [2];
+                    }
+                    _a.label = 4;
+                case 4: return [3, 6];
+                case 5:
+                    e_7 = _a.sent();
+                    return [3, 6];
+                case 6:
+                    _a.trys.push([6, 8, , 9]);
+                    return [4, screen.orientation.lock('landscape')];
+                case 7:
+                    _a.sent();
+                    return [3, 9];
+                case 8:
+                    e_8 = _a.sent();
+                    return [3, 9];
+                case 9: return [2];
+            }
+        });
+    });
+}
+['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) { return document.addEventListener(ev, function () {
+    $('plFsIc').innerHTML = isFs() ? ICON.fsx : ICON.fs;
+    if (!isFs()) {
+        try {
+            screen.orientation.unlock();
+        }
+        catch (e) { }
+    }
+}); });
+var gz = $('plGesture');
+var g = null, lastTap = 0, lastX = 0, lastY = 0, tapTimer = 0;
+gz.addEventListener('pointerdown', function (e) {
+    gz.setPointerCapture(e.pointerId);
+    var r = stage.getBoundingClientRect();
+    g = { id: e.pointerId, x: e.clientX, y: e.clientY, mode: null, moved: false, h: r.height,
+        side: (e.clientX - r.left) < r.width / 2 ? 'left' : 'right' };
+});
+gz.addEventListener('pointermove', function (e) {
+    if (!g || e.pointerId !== g.id)
+        return;
+    var dx = e.clientX - g.x, dy = e.clientY - g.y;
+    if (Math.hypot(dx, dy) > 12)
+        g.moved = true;
+    if (!g.mode) {
+        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+            g.mode = g.side === 'left' ? 'bright' : 'vol';
+            g.start = g.mode === 'vol' ? (video.muted ? 0 : video.volume) : brightness;
+        }
+        else
+            return;
+    }
+    var delta = -dy / (g.h * 0.7);
+    if (g.mode === 'vol')
+        setVolume(g.start + delta);
+    else
+        setBrightness(g.start + delta * 1.4);
+});
+var gEnd = function (e) {
+    if (!g || e.pointerId !== g.id)
+        return;
+    var was = g;
+    g = null;
+    if (was.moved || e.type === 'pointercancel')
+        return;
+    var now = performance.now();
+    if (now - lastTap < 300 && Math.hypot(e.clientX - lastX, e.clientY - lastY) < 40) {
+        clearTimeout(tapTimer);
+        lastTap = 0;
+        toggleFs();
+        return;
+    }
+    lastTap = now;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    tapTimer = setTimeout(function () {
+        if (panelOpen)
+            closePanel();
+        else if (uiOn)
+            hideUI();
+        else
+            showUI();
+    }, 260);
+};
+gz.addEventListener('pointerup', gEnd);
+gz.addEventListener('pointercancel', gEnd);
+stage.addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse')
+        return;
+    var n = performance.now();
+    if (n - lastMove > 200) {
+        lastMove = n;
+        showUI();
+    }
+});
+function seasonsSorted(s) {
+    var seasons = groupSeasons(s);
+    var names = Object.keys(seasons).sort(function (a, b) { return seasonOrder(a) - seasonOrder(b) || a.localeCompare(b, 'ar'); });
+    return { seasons: seasons, names: names };
+}
+function renderEpPanel() {
+    var s = playerSeries;
+    if (!s)
+        return;
+    var _a = seasonsSorted(s), seasons = _a.seasons, names = _a.names;
+    if (!names.length)
+        return;
+    if (!plSeason || !seasons[plSeason]) {
+        var cur = s.episodes.find(function (e) { return e.realid === playerEpId; });
+        plSeason = cur ? seasonNameOf(cur) : names[0];
+        if (!seasons[plSeason])
+            plSeason = names[0];
+    }
+    var ae = document.activeElement;
+    var keep = ae && ae.dataset ? ae.dataset.id : null;
+    var chips = $('plChips');
+    chips.innerHTML = '';
+    if (names.length > 1)
+        names.forEach(function (name, i) {
+            var b = document.createElement('button');
+            b.className = 'pl-chip' + (name === plSeason ? ' on' : '');
+            b.tabIndex = 0;
+            var o = seasonOrder(name);
+            b.textContent = o < 999 ? o : i + 1;
+            b.onclick = function () { plSeason = name; renderEpPanel(); };
+            chips.appendChild(b);
+        });
+    var box = $('plEps');
+    box.innerHTML = '';
+    seasons[plSeason].slice().sort(function (a, b) { return episodeNumber(a) - episodeNumber(b); }).forEach(function (ep) {
+        var b = document.createElement('button');
+        b.className = 'pl-ep' + (ep.realid === playerEpId ? ' cur' : '');
+        b.dataset.id = ep.realid;
+        b.tabIndex = 0;
+        var n = episodeNumber(ep);
+        b.textContent = n === 9999 ? '?' : n;
+        b.onclick = function () { closePanel(true); playMovie(ep.realid, ep.title, playerSeries); };
+        box.appendChild(b);
+    });
+    if (keep) {
+        var f = Array.from(box.children).find(function (el) { return el.dataset.id === keep; });
+        if (f)
+            f.focus();
+    }
+}
+function openPanel() {
+    if (!playerSeries)
+        return;
+    hideUI();
+    panelOpen = true;
+    plSeason = null;
+    renderEpPanel();
+    $('plPanel').classList.add('open');
+    var cur = $('plEps').querySelector('.cur');
+    if (cur) {
+        cur.scrollIntoView({ block: 'center' });
+        setTimeout(function () { return cur.focus(); }, 60);
+    }
+}
+function closePanel(silent) {
+    $('plPanel').classList.remove('open');
+    panelOpen = false;
+    if (!silent) {
+        showUI();
+        $('plEpisodes').focus();
+    }
+}
+function nextEpisode() {
+    var s = playerSeries;
+    if (!s)
+        return null;
+    var all = s.episodes.slice().sort(function (a, b) {
+        return seasonOrder(seasonNameOf(a)) - seasonOrder(seasonNameOf(b)) || seasonNameOf(a).localeCompare(seasonNameOf(b), 'ar') || episodeNumber(a) - episodeNumber(b);
+    });
+    var i = all.findIndex(function (e) { return e.realid === playerEpId; });
+    return i >= 0 ? (all[i + 1] || null) : null;
+}
+function destroyHls() { if (hls) {
+    hls.destroy();
+    hls = null;
+} }
+function attachSource(url, token) {
+    if (window.Hls && Hls.isSupported()) {
+        hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 60, backBufferLength: 30, enableWorker: true });
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () { buildQualities(); safePlay(video); });
+        hls.on(Hls.Events.ERROR, function (_, d) {
+            if (!d.fatal || token !== plToken)
+                return;
+            if (d.type === Hls.ErrorTypes.NETWORK_ERROR && netRetries++ < 3)
+                hls.startLoad();
+            else if (d.type === Hls.ErrorTypes.MEDIA_ERROR && netRetries++ < 3)
+                hls.recoverMediaError();
+            else {
+                setLoading(false);
+                toast(ICON.warn, true);
+            }
+        });
+    }
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        safePlay(video);
+    }
+    else {
+        setLoading(false);
+        toast('المتصفح لا يدعم التشغيل');
+    }
+}
+function playMovie(realid_1, title_1) {
+    return __awaiter(this, arguments, void 0, function (realid, title, series) {
+        var token, it, res, data, e_9;
+        if (series === void 0) { series = null; }
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    token = ++plToken;
+                    playerSeries = series;
+                    playerEpId = realid;
+                    plSeason = null;
+                    if (series) {
+                        startLoad(series, 'full');
+                        setLast(series.series_slug, realid);
+                    }
+                    curStreamUrl = '';
+                    curTitle = title || '';
+                    {
+                        it = series || movieMap.get('m' + realid);
+                        curPoster = (it && it.thumbnail) || '';
+                    }
+                    syncFavUI();
+                    destroyHls();
+                    video.pause();
+                    video.removeAttribute('src');
+                    video.load();
+                    $('plTitle').textContent = title || '';
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    setProg(0);
+                    $('plBuf').style.transform = 'scaleX(0)';
+                    $('plCur').textContent = '0:00';
+                    $('plDur').textContent = '0:00';
+                    lastSec = -1;
+                    lastDur = -1;
+                    $('plQuality').style.display = 'none';
+                    qList = [];
+                    qPos = 0;
+                    netRetries = 0;
+                    $('plEpisodes').style.display = series ? 'flex' : 'none';
+                    closePanel(true);
+                    setLoading(true);
+                    showUI();
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
+                    return [4, fetch("".concat(API, "?action=stream&realid=").concat(realid))];
+                case 2:
+                    res = _a.sent();
+                    return [4, res.json()];
+                case 3:
+                    data = _a.sent();
+                    if (token !== plToken)
+                        return [2];
+                    if (!data.url) {
+                        setLoading(false);
+                        toast('تعذر استخراج رابط المشاهدة');
+                        return [2];
+                    }
+                    curStreamUrl = data.url;
+                    attachSource(data.url, token);
+                    if (castSession())
+                        sendToCast();
+                    return [3, 5];
+                case 4:
+                    e_9 = _a.sent();
+                    if (token !== plToken)
+                        return [2];
+                    setLoading(false);
+                    toast('حدث خطأ أثناء جلب الفيديو');
+                    return [3, 5];
+                case 5: return [2];
+            }
+        });
+    });
+}
+function closePlayer() {
+    plToken++;
+    try {
+        if (castSession())
+            cast.framework.CastContext.getInstance().endCurrentSession(true);
+    }
+    catch (e) { }
+    modal.classList.remove('show', 'ui-on', 'loading');
+    closePanel(true);
+    video.pause();
+    destroyHls();
+    video.removeAttribute('src');
+    video.load();
+    if (isFs()) {
+        try {
+            (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        }
+        catch (e) { }
+    }
+    try {
+        screen.orientation.unlock();
+    }
+    catch (e) { }
+    document.body.style.overflow = '';
+    playerSeries = null;
+}
+$('plClose').onclick = closePlayer;
+$('plPlay').onclick = togglePlay;
+$('plBack').onclick = function () { return skip(-10); };
+$('plFwd').onclick = function () { return skip(10); };
+$('plMute').onclick = function () { video.muted = !video.muted; if (!video.muted && video.volume === 0)
+    video.volume = 0.5; showUI(); };
+$('plFs').onclick = toggleFs;
+$('plAspect').onclick = cycleAspect;
+$('plQuality').onclick = cycleQuality;
+$('plEpisodes').onclick = openPanel;
+$('plPanelClose').onclick = function () { return closePanel(); };
+$('plAspectIc').innerHTML = ASPECTS[0].icon;
+video.addEventListener('play', function () { $('plPlayIc').innerHTML = ICON.pause; showUI(); });
+video.addEventListener('pause', function () { $('plPlayIc').innerHTML = ICON.play; if (plOpen())
+    showUI(); });
+video.addEventListener('volumechange', function () { $('plMuteIc').innerHTML = (video.muted || video.volume === 0) ? ICON.mute : ICON.vol; });
+video.addEventListener('waiting', function () { return setLoading(true); });
+['playing', 'canplay', 'seeked'].forEach(function (ev) { return video.addEventListener(ev, function () { return setLoading(false); }); });
+['loadedmetadata', 'durationchange', 'timeupdate', 'seeked'].forEach(function (ev) { return video.addEventListener(ev, function () { if (uiOn)
+    kick(); }); });
+video.addEventListener('ended', function () {
+    var n = nextEpisode();
+    if (n)
+        playMovie(n.realid, n.title, playerSeries);
+    else
+        showUI();
+});
+function loadCategory(slug, btn) {
+    favMode = false;
+    favWas = false;
+    document.querySelectorAll('.cat-btn').forEach(function (b) { return b.classList.remove('active'); });
+    btn.classList.add('active');
+    if (searchMode) {
+        searchMode = false;
+        sq.id++;
+        clearTimeout(sq.timer);
+        if (sq.ctrl)
+            sq.ctrl.abort();
+        sq.pool = new Map();
+    }
+    sInput.value = '';
+    currentCategory = slug;
+    loadMore(true);
+}
+function handleSearch(e) {
+    e.preventDefault();
+    clearTimeout(searchDebounce);
+    var v = sInput.value.trim();
+    if (v)
+        runSearch(v, 0);
+    else
+        leaveSearch();
+    sInput.blur();
+}
+document.addEventListener('keydown', function (e) {
+    if (modal.classList.contains('show')) {
+        var ae = document.activeElement;
+        var onCtl = !!(ae && modal.contains(ae) && ae.tagName === 'BUTTON');
+        showUI();
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+            e.preventDefault();
+            if (panelOpen)
+                closePanel();
+            else if (isFs())
+                toggleFs();
+            else if (onCtl)
+                ae.blur();
+            else
+                closePlayer();
+            return;
+        }
+        if (!panelOpen && !onCtl) {
+            e.preventDefault();
+            if (e.key === 'ArrowRight')
+                skip(10);
+            else if (e.key === 'ArrowLeft')
+                skip(-10);
+            else if (e.key === 'ArrowUp')
+                setVolume((video.muted ? 0 : video.volume) + 0.1);
+            else if (e.key === 'ArrowDown')
+                setVolume((video.muted ? 0 : video.volume) - 0.1);
+            else if (e.key === ' ')
+                togglePlay();
+            else if (e.key === 'Enter') {
+                togglePlay();
+                $('plPlay').focus();
+            }
+            else if (e.key === 'f' || e.key === 'F')
+                toggleFs();
+            else if (e.key === 'm' || e.key === 'M')
+                $('plMute').click();
+            return;
+        }
+        if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key))
+            return;
+    }
+    if (seriesModal.classList.contains('show')) {
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+            closeSeriesModal();
+            e.preventDefault();
+            return;
+        }
+    }
+    var keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (!keys.includes(e.key))
+        return;
+    if (document.activeElement.tagName === "INPUT")
+        return;
+    var scope = modal.classList.contains('show') ? (panelOpen ? $('plPanel') : modal) : (seriesModal.classList.contains('show') ? seriesModal : document);
+    var focusable = Array.from(scope.querySelectorAll('button, [tabindex="0"]'))
+        .filter(function (el) { return el.offsetWidth > 0 && el.offsetHeight > 0 && !el.disabled && !el.classList.contains('fav-btn') && getComputedStyle(el).visibility !== 'hidden'; });
+    if (focusable.length === 0)
+        return;
+    var current = document.activeElement;
+    if (!current || !focusable.includes(current)) {
+        focusable[0].focus();
+        e.preventDefault();
+        return;
+    }
+    e.preventDefault();
+    var curRect = current.getBoundingClientRect();
+    var best = null, minDist = Infinity;
+    focusable.forEach(function (el) {
+        if (el === current)
+            return;
+        var rect = el.getBoundingClientRect();
+        var dx = (rect.left + rect.width / 2) - (curRect.left + curRect.width / 2);
+        var dy = (rect.top + rect.height / 2) - (curRect.top + curRect.height / 2);
+        var inDir = false, dist = Infinity;
+        if (e.key === "ArrowRight" && dx > 10) {
+            inDir = true;
+            dist = Math.abs(dx) + Math.abs(dy) * 2;
+        }
+        if (e.key === "ArrowLeft" && dx < -10) {
+            inDir = true;
+            dist = Math.abs(dx) + Math.abs(dy) * 2;
+        }
+        if (e.key === "ArrowDown" && dy > 10) {
+            inDir = true;
+            dist = Math.abs(dy) + Math.abs(dx) * 2;
+        }
+        if (e.key === "ArrowUp" && dy < -10) {
+            inDir = true;
+            dist = Math.abs(dy) + Math.abs(dx) * 2;
+        }
+        if (inDir && dist < minDist) {
+            minDist = dist;
+            best = el;
+        }
+    });
+    if (best) {
+        best.focus();
+        best.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+});
+var mouseTimer, curHidden = false;
+document.addEventListener('mousemove', function () {
+    if (curHidden) {
+        document.body.style.cursor = 'default';
+        curHidden = false;
+    }
+    clearTimeout(mouseTimer);
+    mouseTimer = setTimeout(function () { document.body.style.cursor = 'none'; curHidden = true; }, 3000);
+}, { passive: true });
+var FAV_KEY = 'alm_fav_v1';
+var favs = [], favMode = false, favWas = false;
+try {
+    favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+}
+catch (e) {
+    favs = [];
+}
+var isFav = function (k) { return favs.some(function (f) { return f.k === k; }); };
+function toggleFav(item) {
+    var i = favs.findIndex(function (f) { return f.k === item.key; });
+    if (i >= 0)
+        favs.splice(i, 1);
+    else
+        favs.unshift({ k: item.key, t: item.title, th: item.thumbnail, s: item.series_slug, r: item.realid, i: item.infoName });
+    try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+    }
+    catch (e) { }
+    syncFavUI();
+    if (favMode)
+        renderFavs();
+}
+function syncFavUI() {
+    document.querySelectorAll('.fav-btn').forEach(function (b) { return b.classList.toggle('on', isFav(b.dataset.k)); });
+    var sf = $('smFav');
+    if (sf)
+        sf.classList.toggle('on', !!activeSeries && isFav(activeSeries.key));
+    var it = playerSeries || movieMap.get('m' + playerEpId);
+    var pf = $('plFav');
+    pf.style.display = it ? 'flex' : 'none';
+    pf.classList.toggle('on', !!it && isFav(it.key));
+    $('plFavIc').innerHTML = ICON.heart;
+}
+function renderFavs() {
+    var grid = $('movieGrid');
+    clearGrid();
+    hasMore = false;
+    loadingMore = false;
+    if (!favs.length)
+        grid.innerHTML = '<p class="muted">ما أضفت شي للمفضلة بعد — اضغط ♥ على أي فيلم أو مسلسل.</p>';
+    else
+        renderCards(favs.map(itemFromEntry));
+    updateMoreBtn();
+}
+function showFavorites(btn) {
+    document.querySelectorAll('.cat-btn').forEach(function (b) { return b.classList.remove('active'); });
+    btn.classList.add('active');
+    if (searchMode) {
+        searchMode = false;
+        sq.id++;
+        clearTimeout(sq.timer);
+        if (sq.ctrl)
+            sq.ctrl.abort();
+        sq.pool = new Map();
+    }
+    sInput.value = '';
+    favMode = true;
+    favWas = false;
+    listToken++;
+    pending.length = 0;
+    renderFavs();
+}
+$('smFav').onclick = function () { if (activeSeries)
+    toggleFav(activeSeries); };
+$('plFav').onclick = function () { var it = playerSeries || movieMap.get('m' + playerEpId); if (it)
+    toggleFav(it); showUI(); };
+$('smPlay').onclick = function () { var s = activeSeries, t = s && playTarget(s); if (t) {
+    closeSeriesModal();
+    playMovie(t.realid, t.title, s);
+} };
+$('smRefresh').onclick = function () { if (!activeSeries)
+    return; activeSeries.tried = new Set(); startLoad(activeSeries, 'deep', true); updateLoadStatus(); };
+$('seriesStory').onclick = function (e) { return e.currentTarget.classList.toggle('open'); };
+syncFavUI();
+var castOK = false, castLoading = false, curStreamUrl = '', curTitle = '', curPoster = '';
+var castSession = function () { try {
+    return castOK ? cast.framework.CastContext.getInstance().getCurrentSession() : null;
+}
+catch (e) {
+    return null;
+} };
+function updateCastBtn() { $('plCast').classList.toggle('on', !!castSession()); }
+function initCast() {
+    try {
+        var ctx = cast.framework.CastContext.getInstance();
+        ctx.setOptions({ receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED });
+        ctx.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, updateCastBtn);
+        castOK = true;
+    }
+    catch (e) {
+        castOK = false;
+    }
+}
+function loadCastSdk() {
+    if (castLoading)
+        return;
+    var ua = navigator.userAgent;
+    if (!/Chrome\//.test(ua) || /iP(hone|ad|od)/.test(ua))
+        return;
+    castLoading = true;
+    window.__onGCastApiAvailable = function (ok) { if (ok)
+        initCast(); };
+    var sc = document.createElement('script');
+    sc.async = true;
+    sc.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+    document.head.appendChild(sc);
+}
+function sendToCast() {
+    var s = castSession();
+    if (!s || !curStreamUrl)
+        return;
+    try {
+        var mi = new chrome.cast.media.MediaInfo(curStreamUrl, 'application/x-mpegurl');
+        mi.streamType = chrome.cast.media.StreamType.BUFFERED;
+        mi.metadata = new chrome.cast.media.GenericMediaMetadata();
+        mi.metadata.title = curTitle;
+        if (curPoster)
+            mi.metadata.images = [{ url: curPoster }];
+        var rq = new chrome.cast.media.LoadRequest(mi);
+        rq.currentTime = video.currentTime || 0;
+        rq.autoplay = true;
+        s.loadMedia(rq).then(function () {
+            video.pause();
+            var dev = s.getCastDevice && s.getCastDevice();
+            toast('يعرض على ' + ((dev && dev.friendlyName) || 'التلفزيون'));
+            updateCastBtn();
+        }, function () { return toast('تعذر العرض على التلفزيون'); });
+    }
+    catch (e) {
+        toast('تعذر العرض على التلفزيون');
+    }
+}
+function shareStream() {
+    return __awaiter(this, void 0, void 0, function () {
+        var e_10, e_11;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 3, , 4]);
+                    if (!navigator.share) return [3, 2];
+                    return [4, navigator.share({ title: curTitle || 'Alameeere', url: curStreamUrl })];
+                case 1:
+                    _a.sent();
+                    return [2];
+                case 2: return [3, 4];
+                case 3:
+                    e_10 = _a.sent();
+                    if (e_10 && e_10.name === 'AbortError')
+                        return [2];
+                    return [3, 4];
+                case 4:
+                    _a.trys.push([4, 6, , 7]);
+                    return [4, navigator.clipboard.writeText(curStreamUrl)];
+                case 5:
+                    _a.sent();
+                    toast('تم نسخ رابط البث — الصقه في مشغل التلفزيون');
+                    return [3, 7];
+                case 6:
+                    e_11 = _a.sent();
+                    window.prompt('انسخ رابط البث:', curStreamUrl);
+                    return [3, 7];
+                case 7: return [2];
+            }
+        });
+    });
+}
+$('plCast').onclick = function () {
+    showUI();
+    if (!curStreamUrl) {
+        toast('انتظر تحميل الفيديو');
+        return;
+    }
+    if (castOK) {
+        var ctx = cast.framework.CastContext.getInstance(), s = ctx.getCurrentSession();
+        if (s) {
+            var t = null;
+            try {
+                var ms = s.getMediaSession();
+                t = ms && ms.getEstimatedTime ? ms.getEstimatedTime() : null;
+            }
+            catch (e) { }
+            ctx.endCurrentSession(true);
+            if (t)
+                video.currentTime = t;
+            safePlay(video);
+            updateCastBtn();
+            return;
+        }
+        ctx.requestSession().then(function (err) { if (!err)
+            sendToCast(); }).catch(function () { });
+        return;
+    }
+    shareStream();
+};
+new MutationObserver(function () { if (modal.classList.contains('show'))
+    loadCastSdk(); }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+var deferredPrompt = null;
+var installBtn = $('installBtn');
+var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; if (!standalone)
+    installBtn.hidden = false; });
+window.addEventListener('appinstalled', function () { installBtn.hidden = true; deferredPrompt = null; });
+if (isIOS && !standalone)
+    installBtn.hidden = false;
+installBtn.onclick = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var e_12;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (!deferredPrompt) return [3, 5];
+                deferredPrompt.prompt();
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4, deferredPrompt.userChoice];
+            case 2:
+                _a.sent();
+                return [3, 4];
+            case 3:
+                e_12 = _a.sent();
+                return [3, 4];
+            case 4:
+                deferredPrompt = null;
+                installBtn.hidden = true;
+                return [3, 6];
+            case 5:
+                alert('لتثبيت التطبيق: اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية»');
+                _a.label = 6;
+            case 6: return [2];
+        }
+    });
+}); };
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () { return navigator.serviceWorker.register('sw.js').catch(function () { }); });
+}
+
+  </script>
+</body>
+</html>
